@@ -233,26 +233,26 @@ console.log('\\n🚀 Visit prepalgo.com for more!');
 
   if (phase === 'visit') {
     return (
-      <div className="relative bg-white dark:bg-gray-900 rounded-lg p-6 font-mono text-sm border border-gray-300 dark:border-gray-700 shadow-xl overflow-hidden transition-all duration-500 ease-in-out">
-        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-300 dark:border-gray-700">
+      <div className="relative bg-white dark:bg-gray-900 rounded-lg p-4 sm:p-6 font-mono text-xs sm:text-sm border border-gray-300 dark:border-gray-700 shadow-xl overflow-hidden transition-all duration-500 ease-in-out">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-300 dark:border-gray-700">
           <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
           </div>
-          <span className="text-gray-600 dark:text-gray-400 text-xs ml-4">smartRecommendations.js</span>
+          <span className="text-gray-600 dark:text-gray-400 text-xs ml-2 sm:ml-4">smartRecommendations.js</span>
         </div>
         
-        <div className="min-h-[200px] max-h-[250px] flex items-center justify-center">
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">🚀</div>
-            <h3 className="text-xl text-gray-900 dark:text-white mb-4">Ready to practice more?</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">Experience the full PrepAlgo platform with personalized recommendations</p>
+        <div className="min-h-[150px] sm:min-h-[200px] max-h-[200px] sm:max-h-[250px] flex items-center justify-center">
+          <div className="text-center py-8 sm:py-12">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🚀</div>
+            <h3 className="text-lg sm:text-xl text-gray-900 dark:text-white mb-3 sm:mb-4">Ready to practice more?</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base px-4">Experience the full PrepAlgo platform with personalized recommendations</p>
             <a
               href="https://prepalgo.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
             >
               Visit PrepAlgo Platform
             </a>
@@ -263,20 +263,20 @@ console.log('\\n🚀 Visit prepalgo.com for more!');
   }
 
   return (
-    <div className="relative bg-white dark:bg-gray-900 rounded-lg p-6 font-mono text-sm border border-gray-300 dark:border-gray-700 shadow-xl overflow-hidden transition-all duration-500 ease-in-out">
+    <div className="relative bg-white dark:bg-gray-900 rounded-lg p-4 sm:p-6 font-mono text-xs sm:text-sm border border-gray-300 dark:border-gray-700 shadow-xl overflow-hidden transition-all duration-500 ease-in-out">
       {/* Terminal Header */}
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-300 dark:border-gray-700">
+      <div className="flex items-center gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-300 dark:border-gray-700">
         <div className="flex gap-2">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
         </div>
-        <span className="text-gray-600 dark:text-gray-400 text-xs ml-4">smartRecommendations.js</span>
+        <span className="text-gray-600 dark:text-gray-400 text-xs ml-2 sm:ml-4">smartRecommendations.js</span>
       </div>
 
       {/* Code Content */}
-      <div ref={codeContainerRef} className="relative min-h-[200px] max-h-[250px] overflow-y-auto transition-all duration-300 ease-in-out scroll-smooth">
-        <pre className="text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">
+      <div ref={codeContainerRef} className="relative min-h-[150px] sm:min-h-[200px] max-h-[200px] sm:max-h-[250px] md:max-h-[280px] overflow-y-auto transition-all duration-300 ease-in-out scroll-smooth">
+        <pre className="text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap text-xs sm:text-sm">
           <code 
             className="language-javascript"
             dangerouslySetInnerHTML={{ 
@@ -284,25 +284,25 @@ console.log('\\n🚀 Visit prepalgo.com for more!');
             }}
           />
           {/* Blinking Cursor */}
-          <span className={`inline-block w-2 h-5 bg-blue-500 dark:bg-blue-400 ml-1 ${
+          <span className={`inline-block w-1.5 sm:w-2 h-4 sm:h-5 bg-blue-500 dark:bg-blue-400 ml-1 ${
             showCursor ? 'opacity-100' : 'opacity-0'
           } transition-opacity`}></span>
         </pre>
 
         {/* Interactive Problem Selection */}
         {phase === 'recommendations' && (
-          <div className="mt-6 space-y-3 transition-all duration-300 ease-in-out">
-            <div className="text-blue-600 dark:text-blue-400 mb-3">📝 Select a problem to start:</div>
+          <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3 transition-all duration-300 ease-in-out">
+            <div className="text-blue-600 dark:text-blue-400 mb-2 sm:mb-3 text-xs sm:text-sm">📝 Select a problem to start:</div>
             {problems.map((problem, index) => (
               <button
                 key={problem.id}
                 onClick={() => handleProblemSelect(problem)}
-                className="w-full text-left p-3 rounded border border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all group"
+                className="w-full text-left p-2.5 sm:p-3 rounded border border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all group touch-manipulation"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-gray-900 dark:text-white font-medium">{index + 1}. {problem.title}</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center flex-wrap gap-2">
+                    <span className="text-gray-900 dark:text-white font-medium text-xs sm:text-sm">{index + 1}. {problem.title}</span>
+                    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs ${
                       problem.difficulty === 'Easy' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
                       problem.difficulty === 'Medium' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300' :
                       'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
@@ -314,7 +314,7 @@ console.log('\\n🚀 Visit prepalgo.com for more!');
                     {problem.topic}
                   </div>
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 text-xs mt-1">
+                <div className="text-gray-600 dark:text-gray-400 text-xs mt-1 leading-relaxed">
                   {problem.reason}
                 </div>
               </button>
@@ -324,8 +324,8 @@ console.log('\\n🚀 Visit prepalgo.com for more!');
 
         {/* Instructions */}
         {(phase === 'solving' || phase === 'completed') && (
-          <div className="mt-4 text-gray-600 dark:text-gray-400 text-xs text-center transition-all duration-300 ease-in-out">
-            Press <kbd className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded">Enter</kbd> to continue
+          <div className="mt-3 sm:mt-4 text-gray-600 dark:text-gray-400 text-xs text-center transition-all duration-300 ease-in-out">
+            Press <kbd className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">Enter</kbd> to continue
           </div>
         )}
       </div>

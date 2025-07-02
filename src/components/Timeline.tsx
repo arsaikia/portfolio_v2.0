@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Calendar, MapPin, Briefcase, Award, ChevronDown, TrendingUp, Users, Target, Code, ExternalLink, ArrowRight, DollarSign, Zap, Shield, Globe } from 'lucide-react'
+import { Calendar, MapPin, Briefcase, Award, ChevronDown, TrendingUp, Users, Target, Code, DollarSign, Zap, Shield, Globe } from 'lucide-react'
 
 interface Achievement {
   metric: string
@@ -30,11 +30,11 @@ interface TimelineData {
 
 const Timeline = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const [scrollProgress, setScrollProgress] = useState(0)
+
   const [activeIndex, setActiveIndex] = useState(0)
   const [canScrollDown, setCanScrollDown] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null)
+
 
   const timelineData: TimelineData[] = [
     {
@@ -156,7 +156,7 @@ const Timeline = () => {
       const maxScroll = scrollHeight - clientHeight
       const progress = maxScroll > 0 ? scrollTop / maxScroll : 0
       
-      setScrollProgress(Math.min(progress, 1))
+
       setActiveIndex(Math.min(Math.floor(progress * timelineData.length), timelineData.length - 1))
       setCanScrollDown(scrollTop < maxScroll - 10)
     }
@@ -250,7 +250,7 @@ const Timeline = () => {
             <div className={`space-y-8 md:space-y-12 ${isMobile ? 'py-6' : 'py-8'}`}>
               {timelineData.map((item, index) => {
                 const isActive = activeIndex >= index
-                const isHovered = hoveredCard === item.id
+
                 
                 return (
                   <div
@@ -259,8 +259,7 @@ const Timeline = () => {
                       isActive ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-4'
                     }`}
                     data-timeline-item={item.id}
-                    onMouseEnter={() => !isMobile && setHoveredCard(item.id)}
-                    onMouseLeave={() => !isMobile && setHoveredCard(null)}
+
                   >
                     {/* Clean Timeline Card - Matching Hero Design */}
                     <div className="group relative">
@@ -376,7 +375,7 @@ const Timeline = () => {
                               Technologies
                             </h4>
                             <div className="flex flex-wrap gap-1.5">
-                              {item.technologies.map((tech, techIndex) => (
+                              {item.technologies.map((tech) => (
                                 <span
                                   key={tech}
                                   className={`px-2 py-1 font-medium rounded-md transition-all duration-200 ${

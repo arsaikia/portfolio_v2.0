@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Github, ArrowRight } from 'lucide-react'
+import { Mail, Phone, Linkedin, Github } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 const Contact = () => {
@@ -18,7 +18,7 @@ const Contact = () => {
       title: 'Phone',
       value: '+1 (312) 539-7699',
       link: 'tel:+13125397699'
-    },
+    }
   ]
 
   const socialLinks = [
@@ -33,7 +33,7 @@ const Contact = () => {
         if (entry.isIntersecting) {
           setIsVisible(true)
           // Trigger staggered animations
-          contactInfo.forEach((item, index) => {
+          contactInfo.forEach((_, index) => {
             setTimeout(() => {
               setAnimatedItems(prev => ({
                 ...prev,
@@ -42,7 +42,7 @@ const Contact = () => {
             }, index * 200)
           })
           
-          socialLinks.forEach((social, index) => {
+          socialLinks.forEach((_, index) => {
             setTimeout(() => {
               setAnimatedItems(prev => ({
                 ...prev,

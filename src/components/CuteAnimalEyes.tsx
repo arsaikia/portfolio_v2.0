@@ -7,11 +7,12 @@ interface CuteAnimalEyesProps {
 
 const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
   const [eyePosition, setEyePosition] = useState({ left: { x: 0, y: 0 }, right: { x: 0, y: 0 } })
+  const [isHovered, setIsHovered] = useState(false)
   const animalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!animalRef.current) return
+      if (!animalRef.current || isHovered) return
 
       const rect = animalRef.current.getBoundingClientRect()
       const animalCenter = {
@@ -41,19 +42,34 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
 
     document.addEventListener('mousemove', handleMouseMove)
     return () => document.removeEventListener('mousemove', handleMouseMove)
-  }, [size])
+  }, [size, isHovered])
+
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+    // Center the eyes when hovering
+    setEyePosition({
+      left: { x: 0, y: 0 },
+      right: { x: 0, y: 0 }
+    })
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+  }
 
   return (
     <div 
       ref={animalRef}
-      className={`animated-eyes ${className}`}
+      className={`animated-eyes ${className} cursor-pointer`}
       style={{ width: size, height: size }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <svg
         width={size}
         height={size}
         viewBox="0 0 100 100"
-        className="drop-shadow-sm hover:drop-shadow-md transition-all duration-200"
+        className="drop-shadow-sm hover:drop-shadow-md transition-all duration-300"
       >
         {/* Bear ears */}
         <circle
@@ -61,14 +77,14 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           cy="25"
           r="12"
           fill="#8B4513"
-          className="transition-all duration-200"
+          className="transition-all duration-300"
         />
         <circle
           cx="75"
           cy="25"
           r="12"
           fill="#8B4513"
-          className="transition-all duration-200"
+          className="transition-all duration-300"
         />
         
         {/* Inner ears */}
@@ -91,7 +107,7 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           cy="55"
           r="35"
           fill="#DEB887"
-          className="transition-all duration-200"
+          className="transition-all duration-300"
         />
         
         {/* Bear muzzle */}
@@ -123,13 +139,14 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           strokeWidth="0.5"
         />
 
-        {/* Animated left pupil */}
+        {/* Animated left pupil - hidden when hovering */}
         <circle
           cx={38 + eyePosition.left.x}
           cy={48 + eyePosition.left.y}
           r="6"
           fill="#2D3748"
-          className="transition-all duration-100 ease-out"
+          className="transition-all duration-300 ease-out"
+          style={{ opacity: isHovered ? 0 : 1 }}
         >
           {/* Pupil highlight */}
           <animate
@@ -140,23 +157,24 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           />
         </circle>
         
-        {/* Left eye highlight */}
+        {/* Left eye highlight - hidden when hovering */}
         <circle
           cx={38 + eyePosition.left.x + 1.5}
           cy={48 + eyePosition.left.y - 1.5}
           r="2"
           fill="white"
-          opacity="0.8"
-          className="transition-all duration-100 ease-out"
+          opacity={isHovered ? 0 : 0.8}
+          className="transition-all duration-300 ease-out"
         />
 
-        {/* Animated right pupil */}
+        {/* Animated right pupil - hidden when hovering */}
         <circle
           cx={62 + eyePosition.right.x}
           cy={48 + eyePosition.right.y}
           r="6"
           fill="#2D3748"
-          className="transition-all duration-100 ease-out"
+          className="transition-all duration-300 ease-out"
+          style={{ opacity: isHovered ? 0 : 1 }}
         >
           {/* Pupil highlight */}
           <animate
@@ -167,15 +185,76 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           />
         </circle>
         
-        {/* Right eye highlight */}
+        {/* Right eye highlight - hidden when hovering */}
         <circle
           cx={62 + eyePosition.right.x + 1.5}
           cy={48 + eyePosition.right.y - 1.5}
           r="2"
           fill="white"
-          opacity="0.8"
-          className="transition-all duration-100 ease-out"
+          opacity={isHovered ? 0 : 0.8}
+          className="transition-all duration-300 ease-out"
         />
+
+        {/* Closed eyes (eyelids) - shown when hovering */}
+        <ellipse
+          cx="38"
+          cy="48"
+          rx="10"
+          ry={isHovered ? "2" : "0"}
+          fill="#CD853F"
+          className="transition-all duration-300 ease-out"
+        />
+        <ellipse
+          cx="62"
+          cy="48"
+          rx="10"
+          ry={isHovered ? "2" : "0"}
+          fill="#CD853F"
+          className="transition-all duration-300 ease-out"
+        />
+
+        {/* Eyelashes for extra cuteness when sleeping */}
+        <g opacity={isHovered ? 1 : 0} className="transition-all duration-300">
+          {/* Left eyelashes */}
+          <path
+            d="M 30 45 L 28 42"
+            stroke="#8B4513"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 34 43 L 32 40"
+            stroke="#8B4513"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 42 43 L 44 40"
+            stroke="#8B4513"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          
+          {/* Right eyelashes */}
+          <path
+            d="M 58 43 L 56 40"
+            stroke="#8B4513"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 66 43 L 68 40"
+            stroke="#8B4513"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 70 45 L 72 42"
+            stroke="#8B4513"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+        </g>
 
         {/* Nose */}
         <ellipse
@@ -186,21 +265,37 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           fill="#8B4513"
         />
 
-        {/* Mouth */}
-        <path
-          d="M 50 68 Q 45 72 40 70"
-          stroke="#8B4513"
-          strokeWidth="1.5"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 50 68 Q 55 72 60 70"
-          stroke="#8B4513"
-          strokeWidth="1.5"
-          fill="none"
-          strokeLinecap="round"
-        />
+        {/* Mouth - changes to sleepy smile when hovering */}
+        <g>
+          {/* Normal mouth - hidden when hovering */}
+          <g opacity={isHovered ? 0 : 1} className="transition-all duration-300">
+            <path
+              d="M 50 68 Q 45 72 40 70"
+              stroke="#8B4513"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d="M 50 68 Q 55 72 60 70"
+              stroke="#8B4513"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </g>
+          
+          {/* Sleepy smile - shown when hovering */}
+          <path
+            d="M 42 70 Q 50 74 58 70"
+            stroke="#8B4513"
+            strokeWidth="1.5"
+            fill="none"
+            strokeLinecap="round"
+            opacity={isHovered ? 1 : 0}
+            className="transition-all duration-300"
+          />
+        </g>
 
         {/* Cheek spots (optional cute detail) */}
         <circle
@@ -208,15 +303,53 @@ const CuteAnimalEyes = ({ size = 60, className = '' }: CuteAnimalEyesProps) => {
           cy="58"
           r="2"
           fill="#F4A460"
-          opacity="0.6"
+          opacity={isHovered ? 0.8 : 0.6}
+          className="transition-all duration-300"
         />
         <circle
           cx="72"
           cy="58"
           r="2"
           fill="#F4A460"
-          opacity="0.6"
+          opacity={isHovered ? 0.8 : 0.6}
+          className="transition-all duration-300"
         />
+
+        {/* Sleep "Z" symbols when hovering */}
+        <g opacity={isHovered ? 0.7 : 0} className="transition-all duration-500 delay-300">
+          <text
+            x="75"
+            y="35"
+            fontSize="8"
+            fill="#8B4513"
+            fontFamily="serif"
+            className="animate-pulse"
+          >
+            z
+          </text>
+          <text
+            x="80"
+            y="28"
+            fontSize="6"
+            fill="#8B4513"
+            fontFamily="serif"
+            className="animate-pulse"
+            style={{ animationDelay: '0.5s' }}
+          >
+            z
+          </text>
+          <text
+            x="85"
+            y="22"
+            fontSize="4"
+            fill="#8B4513"
+            fontFamily="serif"
+            className="animate-pulse"
+            style={{ animationDelay: '1s' }}
+          >
+            z
+          </text>
+        </g>
       </svg>
     </div>
   )

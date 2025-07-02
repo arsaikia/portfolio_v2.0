@@ -7,6 +7,9 @@ import Skills from './components/Skills'
 import Projects from './components/Projects'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import SEOHead from './components/SEOHead'
+import Analytics from './components/Analytics'
+import MobileOptimizations from './components/MobileOptimizations'
 
 function App() {
   const appRef = useRef<HTMLDivElement>(null)
@@ -52,6 +55,9 @@ function App() {
         '--glow-y': '50%'
       } as React.CSSProperties}
     >
+      <SEOHead />
+      <Analytics />
+      <MobileOptimizations />
       {/* Global Cursor Glow Effect */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute w-[25rem] h-[25rem] rounded-full glow-effect"></div>
@@ -63,7 +69,9 @@ function App() {
           <Hero />
           <About />
           <Skills />
-          <Projects />
+          <div data-projects-grid>
+            <Projects />
+          </div>
           <Contact />
         </main>
         <Footer />

@@ -6,7 +6,6 @@ const Hero = () => {
   const heroRef = useRef<HTMLElement>(null)
   const nameRef = useRef<HTMLHeadingElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [scrollY, setScrollY] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
@@ -28,22 +27,13 @@ const Hero = () => {
       }
     }
 
-    // Scroll tracking for parallax effects (throttled for performance)
-    const handleScroll = () => {
-      requestAnimationFrame(() => {
-        setScrollY(window.scrollY)
-      })
-    }
-
     if (!isTouchDevice) {
       window.addEventListener('mousemove', handleMouseMove)
     }
-    window.addEventListener('scroll', handleScroll)
     
     return () => {
       clearTimeout(timer)
       window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('scroll', handleScroll)
     }
   }, [isTouchDevice])
 
@@ -54,35 +44,27 @@ const Hero = () => {
     }
   }
 
-  // Calculate scroll effects  
-  const heroOpacity = Math.max(1 - scrollY / 800, 0.4) // Gentle fade
-
   return (
     <section 
       id="hero" 
       ref={heroRef}
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden pt-16"
     >
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5 animate-gradient-shift"></div>
       </div>
 
-      <div 
-        className="w-full py-8 sm:py-12 lg:py-16 relative z-10 transition-all duration-1000 ease-out"
-        style={{
-          opacity: heroOpacity,
-        }}
-      >
+      <div className="w-full py-8 sm:py-12 lg:py-16 relative z-10">
         {/* Main Content - Responsive Layout */}
-        <div className="container-max section-padding">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-8 md:mb-12">
+        <div className="container-hero section-padding min-w-0 w-full">
+          <div className="grid lg:grid-cols-2 items-center mb-8 md:mb-12">
             {/* Left Column - Hero Intro */}
             <div className="text-center lg:text-left">
               <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
                 <h1 
                   ref={nameRef}
-                  className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight transition-all duration-1000 ease-out ${
+                  className={`text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-relaxed xs:leading-tight tracking-tight transition-all duration-1000 ease-out responsive-text ${
                     isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                 >
@@ -92,7 +74,7 @@ const Hero = () => {
                 </h1>
                 
                 <h2 
-                  className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium transition-all duration-1000 ease-out delay-300 ${
+                  className={`text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium transition-all duration-1000 ease-out delay-300 ${
                     isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                 >
@@ -102,7 +84,7 @@ const Hero = () => {
                 </h2>
 
                 <p 
-                  className={`text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed transition-all duration-1000 ease-out delay-500 max-w-lg mx-auto lg:mx-0 ${
+                  className={`text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed transition-all duration-1000 ease-out delay-500 max-w-lg mx-auto lg:mx-0 ${
                     isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                 >
@@ -116,7 +98,7 @@ const Hero = () => {
               }`}>
                 <button
                   onClick={() => scrollToSection('projects')}
-                  className={`group relative flex items-center justify-center gap-2 border border-gray-400/50 dark:border-gray-500/50 text-gray-800 dark:text-gray-200 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl font-medium hover:border-gray-500/70 dark:hover:border-gray-400/70 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-300 shadow-sm hover:shadow-md ${!isTouchDevice ? 'cursor-aware-button' : ''} text-sm sm:text-base`}
+                  className={`group relative flex items-center justify-center gap-2 border border-gray-300/60 dark:border-gray-500/50 text-gray-700 dark:text-gray-200 bg-white/60 dark:bg-gray-800/50 backdrop-blur-md px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl font-medium hover:border-gray-400/80 dark:hover:border-gray-400/70 hover:bg-white/80 dark:hover:bg-gray-800/70 transition-all duration-300 shadow-sm hover:shadow-md ${!isTouchDevice ? 'cursor-aware-button' : ''} text-sm sm:text-base`}
                   style={!isTouchDevice ? {
                     transform: `perspective(1000px) rotateX(${mousePosition.y * 5}deg) rotateY(${mousePosition.x * 5}deg) translateZ(0)`,
                   } : {}}

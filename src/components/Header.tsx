@@ -7,10 +7,21 @@ const Header = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
 
   useEffect(() => {
-    const isDark = localStorage.getItem('darkMode') === 'true'
-    setIsDarkMode(isDark)
-    if (isDark) {
+    // Check if user has explicitly set a preference
+    const userPreference = localStorage.getItem('darkMode')
+    
+    if (userPreference === null) {
+      // No preference set, default to dark mode
+      setIsDarkMode(true)
+      localStorage.setItem('darkMode', 'true')
       document.documentElement.classList.add('dark')
+    } else {
+      // Use user's saved preference
+      const isDark = userPreference === 'true'
+      setIsDarkMode(isDark)
+      if (isDark) {
+        document.documentElement.classList.add('dark')
+      }
     }
   }, [])
 
@@ -34,7 +45,6 @@ const Header = () => {
   }
 
   const navItems = [
-    { name: 'Home', href: 'hero' },
     { name: 'About', href: 'about' },
     { name: 'Skills', href: 'skills' },
     { name: 'Projects', href: 'projects' },
@@ -43,7 +53,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-      <div className="container-max section-padding">
+      <div className="container-hero section-padding">
         <div className="flex items-center justify-between h-16">
           {/* Logo with Cute Animal Eyes */}
           <div className="flex-shrink-0">

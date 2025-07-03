@@ -66,35 +66,35 @@ const Contact = () => {
     <section 
       ref={sectionRef}
       id="contact" 
-      className="py-12 bg-gray-50/80 dark:bg-gray-800/70 backdrop-blur-sm"
+      className="py-10 sm:py-12 bg-gray-50/80 dark:bg-gray-800/70 backdrop-blur-sm"
     >
       <div className="container-max section-padding">
         {/* Animated Header */}
-        <div className={`text-center mb-8 transition-all duration-1000 ease-out ${
+        <div className={`text-center mb-6 sm:mb-8 transition-all duration-1000 ease-out ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
             <span className="bg-gradient-to-r from-slate-900 via-blue-700 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent">
               Get In Touch
             </span>
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             I'm always interested in hearing about new opportunities, interesting projects, 
             or just having a chat about technology. Let's connect!
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-2xl sm:max-w-4xl mx-auto">
           <div className={`transition-all duration-700 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
               {/* Contact Information */}
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   Contact Information
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {contactInfo.map((info, index) => {
                     const itemKey = `contact-${index}`
                     const isAnimated = animatedItems[itemKey]
@@ -103,7 +103,7 @@ const Contact = () => {
                       <a
                         key={index}
                         href={info.link}
-                        className={`flex items-center space-x-3 p-2 rounded-lg hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-500 ease-out group ${
+                        className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-2.5 rounded-lg hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-500 ease-out group ${
                           isAnimated ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
                         }`}
                         style={{ transitionDelay: `${index * 200}ms` }}
@@ -112,10 +112,10 @@ const Contact = () => {
                           {info.icon}
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                          <h4 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
                             {info.title}
                           </h4>
-                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
                             {info.value}
                           </p>
                         </div>
@@ -126,11 +126,11 @@ const Contact = () => {
               </div>
 
               {/* Social Links */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="mt-6 sm:mt-0">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                   Connect With Me
                 </h3>
-                <div className="flex space-x-3 mb-3">
+                <div className="flex space-x-3 sm:space-x-4 mb-2 sm:mb-3">
                   {socialLinks.map((social, index) => {
                     const itemKey = `social-${index}`
                     const isAnimated = animatedItems[itemKey]
@@ -139,37 +139,39 @@ const Contact = () => {
                       <a
                         key={index}
                         href={social.url}
-                        className={`p-2.5 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-gray-300/60 dark:border-gray-600/60 rounded-lg text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-gray-400/80 dark:hover:border-gray-500/80 transition-all duration-500 ease-out hover:scale-110 shadow-sm hover:shadow-md ${
+                        className={`p-2 sm:p-2.5 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-gray-300/60 dark:border-gray-600/60 rounded-lg text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:border-gray-400/80 dark:hover:border-gray-500/80 transition-all duration-500 ease-out hover:scale-110 shadow-sm hover:shadow-md ${
                           isAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
                         title={social.name}
                         style={{ transitionDelay: `${(contactInfo.length * 200) + (index * 150)}ms` }}
+                        tabIndex={0}
+                        aria-label={social.name}
                       >
                         {social.icon}
                       </a>
                     )
                   })}
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
                   Follow me on social media for updates on my latest projects and tech insights.
                 </p>
               </div>
             </div>
 
             {/* Availability */}
-            <div className={`mt-6 pt-6 border-t border-gray-300/60 dark:border-gray-600/60 transition-all duration-700 ease-out ${
+            <div className={`mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gray-300/60 dark:border-gray-600/60 transition-all duration-700 ease-out ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '600ms' }}>
-              <div className="flex items-center space-x-3 mb-2">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
                 <div className="relative">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                  <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-green-400 rounded-full animate-ping"></div>
                 </div>
-                <span className="text-green-600 dark:text-green-400 font-medium text-sm">
+                <span className="text-green-600 dark:text-green-400 font-medium text-xs sm:text-sm">
                   Available for new opportunities
                 </span>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
                 I'm currently open to discussing new full-time positions, consulting 
                 opportunities, or interesting project collaborations.
               </p>

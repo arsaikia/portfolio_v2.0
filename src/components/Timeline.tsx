@@ -203,49 +203,18 @@ const Timeline = () => {
   return (
     <div className="relative h-full">
       {/* Mobile Timeline Progress Indicator - OUTSIDE scrollable container */}
-      {isMobile && (
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Career Timeline
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-500">
-              {activeIndex + 1} of {timelineData.length}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-1 rounded-full transition-all duration-300"
-              style={{ width: `${((activeIndex + 1) / timelineData.length) * 100}%` }}
-            />
-          </div>
-          {/* Mobile Year Buttons */}
-          <div className="flex justify-center gap-2 mt-3 overflow-x-auto pb-1">
-            {timelineData.map((item, index) => (
-              <button
-                key={item.id}
-                onClick={() => scrollToItem(index)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                  activeIndex >= index
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                {item.year}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Removed sticky header as per user request */}
+
       <div
         ref={scrollContainerRef}
-        className="h-full overflow-y-auto scrollbar-none"
-        style={{ scrollBehavior: 'smooth' }}
+        className={`${!isMobile ? 'h-full overflow-y-auto scrollbar-none' : ''}`}
+        style={!isMobile ? { scrollBehavior: 'smooth' } : {}}
         data-timeline-container
       >
         <div className={`${isMobile ? 'block' : 'flex'} max-w-6xl mx-auto`}>
           {/* Timeline Content */}
           <div className={`${isMobile ? 'w-full' : 'flex-1 pr-8'}`}>
+            {isMobile && <div className="h-4" />}
             <div className={`space-y-8 md:space-y-12 ${isMobile ? 'py-6' : 'py-8'}`}>
               {timelineData.map((item, index) => {
                 const isActive = activeIndex >= index
@@ -255,7 +224,7 @@ const Timeline = () => {
                   <div
                     key={item.id}
                     className={`transition-all duration-700 ease-out ${
-                      isActive ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-4'
+                      !isMobile && (isActive ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-4')
                     }`}
                     data-timeline-item={item.id}
 
@@ -276,34 +245,24 @@ const Timeline = () => {
                         <div className={`${!isMobile ? 'p-4' : ''} relative z-10`}>
                           {/* Header */}
                           <div className="flex items-start gap-3 mb-3">
-                            {/* Year Badge for Mobile */}
-                            {isMobile && (
+                            {/* Company Logo/Icon for Mobile and Desktop */}
+                            {((isMobile || !isMobile)) && (
                               <div className="flex-shrink-0 mt-1">
-                                <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${item.color} flex items-center justify-center text-white text-xs font-bold shadow-sm`}>
-                                  {item.year.slice(-2)}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {/* Clean Icon for Desktop */}
-                            {!isMobile && (
-                              <div className="flex-shrink-0">
                                 {item.company === 'Adobe' ? (
-                                  <img src="/logo_adobe.png" alt="Adobe" className="w-10 h-10 object-contain" />
+                                  <img src="/logo_adobe.png" alt="Adobe" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                                 ) : item.company === 'ManifestHQ' ? (
-                                  <img src="/logo_manifest.png" alt="ManifestHQ" className="w-10 h-10 object-contain" />
+                                  <img src="/logo_manifest.png" alt="ManifestHQ" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                                 ) : item.company === 'IBM' ? (
-                                  <img src="/logo_ibm.png" alt="IBM" className="w-10 h-10 object-contain" />
+                                  <img src="/logo_ibm.png" alt="IBM" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                                 ) : item.company === 'Udacity' ? (
-                                  <img src="/logo_udacity.png" alt="Udacity" className="w-10 h-10 object-contain" />
+                                  <img src="/logo_udacity.png" alt="Udacity" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                                 ) : (
-                                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${item.color} flex items-center justify-center text-white shadow-sm transition-all duration-300`}>
+                                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r ${item.color} flex items-center justify-center text-white shadow-sm transition-all duration-300`}>
                                     {getIcon(item.type)}
                                   </div>
                                 )}
                               </div>
                             )}
-                            
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                                 <div>

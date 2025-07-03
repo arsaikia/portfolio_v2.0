@@ -1,10 +1,11 @@
-import { ExternalLink, Github, Calendar, Users, Play, X } from 'lucide-react'
+import { ExternalLink, Github, Calendar, Users, Play, X, Code2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
   const [selectedDemo, setSelectedDemo] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [mobileDemoPlaying, setMobileDemoPlaying] = useState<number | null>(null)
 
   // Check if mobile
   useEffect(() => {
@@ -25,7 +26,7 @@ const Projects = () => {
       description: 'A comprehensive platform for practicing algorithm problems with real-time code execution, test cases, and performance analysis. Features interactive coding environment and progress tracking.',
       image: '⚡',
       demoImage: '/prep-algo-demo.png',
-      demoVideo: '/prep-algo-demo.mp4',
+      demoVideo: '',
       technologies: ['JavaScript', 'React', 'Node.js', 'Express', 'MongoDB'],
       features: ['Code Execution', 'Test Cases', 'Progress Tracking', 'Performance Analysis'],
       demoLink: 'https://prepalgo.com',
@@ -37,8 +38,8 @@ const Projects = () => {
       title: 'Pathfinding Visualizer',
       description: 'Interactive visualization tool for various pathfinding algorithms including Dijkstra, A*, and BFS. Features real-time algorithm execution with customizable grid and obstacles.',
       image: '🧭',
-      demoImage: '/pathfinding-demo.gif',
-      demoVideo: '/pathfinding-demo.mp4',
+      demoImage: '/pathfinding-demo.png',
+      demoVideo: '/pathfinding-demo.gif',
       technologies: ['JavaScript', 'HTML5', 'CSS3', 'Canvas API'],
       features: ['Multiple Algorithms', 'Real-time Visualization', 'Customizable Grid', 'Performance Metrics'],
       demoLink: '#',
@@ -51,10 +52,10 @@ const Projects = () => {
       description: 'Educational platform for visualizing sorting and searching algorithms with step-by-step execution and performance comparisons.',
       image: '📊',
       demoImage: '/algorithm-demo.png',
-      demoVideo: '/algorithm-demo.mp4',
+      demoVideo: '/algorithm-demo.gif',
       technologies: ['JavaScript', 'React', 'D3.js', 'CSS3'],
       features: ['Sorting Algorithms', 'Searching Algorithms', 'Step-by-step Execution', 'Performance Comparison'],
-      demoLink: '#',
+      demoLink: 'https://arsaikia.github.io/AlgorithmVisualizer/',
       githubLink: 'https://github.com/arsaikia/AlgorithmVisualizer',
       period: '2022',
       team: 'Solo Project'
@@ -63,8 +64,8 @@ const Projects = () => {
       title: 'Human Activity Recognition',
       description: 'Machine Learning project for recognizing human activities using smartphone sensor data. Part of Udacity\'s Machine Learning Engineer Nanodegree Program.',
       image: '🤖',
-      demoImage: '/ml-demo.png',
-      demoVideo: '/ml-demo.mp4',
+      demoImage: '',
+      demoVideo: '',
       technologies: ['Python', 'Jupyter Notebook', 'Scikit-learn', 'Pandas', 'NumPy'],
       features: ['Sensor Data Processing', 'Feature Engineering', 'Model Training', 'Activity Classification'],
       demoLink: '#',
@@ -73,11 +74,11 @@ const Projects = () => {
       team: 'Academic Project'
     },
     {
-      title: 'EWA Term Project',
+      title: 'Ecommerce application with purchase recommendation system',
       description: 'Web application project demonstrating modern web development practices with responsive design and interactive features.',
       image: '🌐',
-      demoImage: '/ewa-demo.png',
-      demoVideo: '/ewa-demo.mp4',
+      demoImage: '',
+      demoVideo: '',
       technologies: ['JavaScript', 'HTML5', 'CSS3', 'Web APIs'],
       features: ['Responsive Design', 'Interactive UI', 'Modern Web Standards', 'Cross-browser Compatibility'],
       demoLink: '#',
@@ -89,8 +90,8 @@ const Projects = () => {
       title: 'Hacktober-Bit_Lords',
       description: 'First-place winning hackathon project for Code Platoon\'s Hacktober 2020. Built a solution to help Illinois Joining Forces (IJF) create a more efficient way to gather resource provider data and distribute information to Illinois state Veterans.',
       image: '🏆',
-      demoImage: '/hackathon-demo.png',
-      demoVideo: '/hackathon-demo.mp4',
+      demoImage: '',
+      demoVideo: '',
       technologies: ['JavaScript', 'Python', 'CSS', 'Backend', 'Frontend'],
       features: ['Veteran Resource Management', 'Data Distribution', 'Efficient Referrals', 'Hackathon Winner'],
       demoLink: '#',
@@ -122,30 +123,51 @@ const Projects = () => {
               onMouseLeave={() => !isMobile && setHoveredProject(null)}
             >
               <div className="h-48 bg-gradient-to-br from-gray-50/80 to-blue-50/60 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden">
-                {project.demoImage && (
+                {/* Cover Image or Demo */}
+                {project.demoImage || project.demoVideo ? (
                   <img 
-                    src={project.demoImage.replace('.gif', '.png')} 
+                    src={
+                      isMobile && mobileDemoPlaying === index && project.demoVideo
+                        ? project.demoVideo
+                        : project.demoImage
+                          ? project.demoImage
+                          : project.demoVideo // fallback to GIF if no image
+                    }
                     alt={`${project.title}`}
-                    className={`w-full h-full object-cover transition-all duration-300 ${!isMobile && hoveredProject === index ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+                    className={`w-full h-full object-cover transition-all duration-300 ${!isMobile && hoveredProject === index && project.demoVideo ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                   />
-                )}
-                
-                {!project.demoImage && (
-                  <div className={`text-6xl transition-all duration-300 ${!isMobile && hoveredProject === index ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}>
-                    {project.image}
+                ) : project.image ? (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-5xl text-gray-400 dark:text-gray-600">
+                    <span className="text-6xl">{project.image}</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-5xl text-gray-400 dark:text-gray-600">
+                    <Code2 size={48} />
                   </div>
                 )}
-                
-                {!isMobile && (
-                  <div className={`absolute inset-0 transition-all duration-300 ${hoveredProject === index ? 'opacity-100' : 'opacity-0'}`}>
-                    {project.demoImage && (
-                      <img 
-                        src={project.demoImage} 
-                        alt={`${project.title} Demo`}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                    
+                {/* Play Demo Button (Mobile) - Only show if demo video exists */}
+                {isMobile && project.demoVideo && (
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-100 transition-opacity duration-300">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setMobileDemoPlaying(mobileDemoPlaying === index ? null : index)
+                      }}
+                      className="text-center text-white"
+                    >
+                      <Play size={32} className="mx-auto mb-1 opacity-80" />
+                      <p className="text-xs font-medium">{mobileDemoPlaying === index ? 'Stop Demo' : 'Play Demo'}</p>
+                    </button>
+                  </div>
+                )}
+                {/* Play Demo Button (Desktop) - Only show if demo video exists */}
+                {!isMobile && hoveredProject === index && project.demoVideo && (
+                  <div className="absolute inset-0 transition-all duration-300 opacity-100">
+                    <img 
+                      src={project.demoVideo} 
+                      alt={`${project.title} Demo`}
+                      className="w-full h-full object-cover"
+                    />
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                       <button 
                         onClick={(e) => {
@@ -155,44 +177,9 @@ const Projects = () => {
                         className="text-center text-white hover:scale-110 transition-transform duration-200"
                       >
                         <Play size={48} className="mx-auto mb-2 opacity-80" />
-                        <p className="text-sm font-medium">View Demo</p>
+                        <p className="text-sm font-medium">Play Demo</p>
                       </button>
                     </div>
-                    
-                    <div className="absolute top-3 right-3 flex space-x-2">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedDemo(index)
-                        }}
-                        className="bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-colors"
-                        title="Play Demo"
-                      >
-                        <Play size={16} className="text-white" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {isMobile && project.demoImage && (
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        const img = e.currentTarget.parentElement?.previousElementSibling as HTMLImageElement
-                        if (img) {
-                          if (img.src.includes('.png')) {
-                            img.src = img.src.replace('.png', '.gif')
-                          } else {
-                            img.src = img.src.replace('.gif', '.png')
-                          }
-                        }
-                      }}
-                      className="text-center text-white"
-                    >
-                      <Play size={32} className="mx-auto mb-1 opacity-80" />
-                      <p className="text-xs font-medium">Play Demo</p>
-                    </button>
                   </div>
                 )}
               </div>
@@ -203,20 +190,30 @@ const Projects = () => {
                     {project.title}
                   </h3>
                   <div className="flex space-x-2">
-                    <a
-                      href={project.demoLink}
-                      className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      title="Live Demo"
-                    >
-                      <ExternalLink size={18} />
-                    </a>
-                    <a
-                      href={project.githubLink}
-                      className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      title="Source Code"
-                    >
-                      <Github size={18} />
-                    </a>
+                    {/* Visit Website Link */}
+                    {project.demoLink && project.demoLink !== '#' && (
+                      <a
+                        href={project.demoLink}
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        title="Visit Website"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink size={18} />
+                      </a>
+                    )}
+                    {/* GitHub Link */}
+                    {project.githubLink && (
+                      <a
+                        href={project.githubLink}
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        title="Source Code"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Github size={18} />
+                      </a>
+                    )}
                   </div>
                 </div>
 
@@ -333,7 +330,7 @@ const Projects = () => {
                 
                 {/* Action Buttons */}
                 <div className="flex gap-4">
-                  {projects[selectedDemo].demoLink !== '#' && (
+                  {projects[selectedDemo]?.demoLink && projects[selectedDemo]?.demoLink !== '#' && (
                     <a
                       href={projects[selectedDemo].demoLink}
                       target="_blank"
@@ -341,18 +338,20 @@ const Projects = () => {
                       className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
                     >
                       <ExternalLink size={16} />
-                      Live Demo
+                      Visit Website
                     </a>
                   )}
-                  <a
-                    href={projects[selectedDemo].githubLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
-                  >
-                    <Github size={16} />
-                    View Code
-                  </a>
+                  {projects[selectedDemo]?.githubLink && (
+                    <a
+                      href={projects[selectedDemo].githubLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                    >
+                      <Github size={16} />
+                      View Code
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

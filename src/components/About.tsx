@@ -39,7 +39,6 @@ const About = () => {
                 <p>Navigate through my career timeline using the year buttons on the right, or scroll through the timeline content.</p>
               </div>
               <div 
-                className="h-[500px]"
                 role="region"
                 aria-label="Career Timeline"
                 tabIndex={0}

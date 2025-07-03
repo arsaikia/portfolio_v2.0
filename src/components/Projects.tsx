@@ -1,11 +1,12 @@
 import { ExternalLink, Github, Calendar, Users, Play, X, Code2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
   const [selectedDemo, setSelectedDemo] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
-  const [mobileDemoPlaying, setMobileDemoPlaying] = useState<number | null>(null)
+  const [visibleProjects, setVisibleProjects] = useState<Set<number>>(new Set())
+  const projectRefs = useRef<(HTMLDivElement | null)[]>([])
 
   // Check if mobile
   useEffect(() => {
@@ -17,6 +18,35 @@ const Projects = () => {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Intersection Observer for mobile autoplay
+  useEffect(() => {
+    if (!isMobile) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = parseInt(entry.target.getAttribute('data-index') || '0')
+          setVisibleProjects(prev => {
+            const newSet = new Set(prev)
+            if (entry.isIntersecting) {
+              newSet.add(index)
+            } else {
+              newSet.delete(index)
+            }
+            return newSet
+          })
+        })
+      },
+      { threshold: 0.5 } // Trigger when 50% of the card is visible
+    )
+
+    projectRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref)
+    })
+
+    return () => observer.disconnect()
+  }, [isMobile])
 
 
 
@@ -106,7 +136,7 @@ const Projects = () => {
       <div className="container-max section-padding">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Featured Projects
+            A few interesting projects
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             A showcase of my key projects demonstrating technical expertise across algorithms, 
@@ -118,6 +148,8 @@ const Projects = () => {
           {projects.map((project, index) => (
             <div 
               key={index} 
+              ref={(el) => { projectRefs.current[index] = el }}
+              data-index={index}
               className="group relative overflow-hidden card"
               onMouseEnter={() => !isMobile && setHoveredProject(index)}
               onMouseLeave={() => !isMobile && setHoveredProject(null)}
@@ -127,7 +159,7 @@ const Projects = () => {
                 {project.demoImage || project.demoVideo ? (
                   <img 
                     src={
-                      isMobile && mobileDemoPlaying === index && project.demoVideo
+                      isMobile && visibleProjects.has(index) && project.demoVideo
                         ? project.demoVideo
                         : project.demoImage
                           ? project.demoImage
@@ -143,21 +175,6 @@ const Projects = () => {
                 ) : (
                   <div className="flex flex-col items-center justify-center w-full h-full text-5xl text-gray-400 dark:text-gray-600">
                     <Code2 size={48} />
-                  </div>
-                )}
-                {/* Play Demo Button (Mobile) - Only show if demo video exists */}
-                {isMobile && project.demoVideo && (
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-100 transition-opacity duration-300">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setMobileDemoPlaying(mobileDemoPlaying === index ? null : index)
-                      }}
-                      className="text-center text-white"
-                    >
-                      <Play size={32} className="mx-auto mb-1 opacity-80" />
-                      <p className="text-xs font-medium">{mobileDemoPlaying === index ? 'Stop Demo' : 'Play Demo'}</p>
-                    </button>
                   </div>
                 )}
                 {/* Play Demo Button (Desktop) - Only show if demo video exists */}

@@ -1,0 +1,16 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="Agradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#3730a3"/>
+    </linearGradient>
+    <linearGradient id="Sgradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3730a3"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <text x="28" y="55" font-family="serif" font-size="48" font-weight="bold" fill="url(#Agradient)">A</text>
+  <text x="62" y="92" font-family="serif" font-size="48" font-weight="bold" fill="url(#Sgradient)">S</text>
+  <line x1="55" y1="80" x2="85" y2="35" stroke="#555" stroke-width="2"/>
+</svg> 

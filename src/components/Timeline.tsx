@@ -201,8 +201,8 @@ const Timeline = () => {
     <div className="relative h-full">
       <div
         ref={scrollContainerRef}
-        className={`${!isMobile ? 'h-[380px] md:h-[480px] overflow-y-auto scrollbar-none scroll-smooth pt-2' : ''}`}
-        style={!isMobile ? { scrollBehavior: 'smooth' } : {}}
+        className='h-[380px] md:h-[480px] overflow-y-auto scrollbar-none scroll-smooth pt-2'
+        style={{ scrollBehavior: 'smooth' }}
         data-timeline-container
       >
         <div className={`${isMobile ? 'block' : 'flex'} max-w-6xl mx-auto`}>

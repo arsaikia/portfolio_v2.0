@@ -1,31 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Calendar, MapPin, Briefcase, Award, TrendingUp, Users, Target, Code, DollarSign, Zap, Shield, Globe } from 'lucide-react'
+import { experience } from '../data/experience'
 
-interface Achievement {
-  metric: string
-  description: string
-  icon: React.ReactNode
-}
+const iconMap = { TrendingUp, Users, Target, Code, DollarSign, Zap, Shield, Globe } as const
+type IconName = keyof typeof iconMap
 
-interface Responsibility {
-  text: string
-  icon: React.ReactNode
-}
-
-interface TimelineData {
-  id: string
-  title: string
-  company: string
-  period: string
-  year: string
-  location: string
-  description: string
-  achievements: Achievement[]
-  responsibilities: Responsibility[]
-  technologies: string[]
-  type: 'work' | 'education'
-  color: string
-  accent: string
+const renderIcon = (name: IconName) => {
+  const Icon = iconMap[name]
+  return <Icon className="w-4 h-4" />
 }
 
 const Timeline = () => {
@@ -35,114 +17,14 @@ const Timeline = () => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
 
-
-  const timelineData: TimelineData[] = [
-    {
-      id: 'adobe',
-      title: 'Senior Full Stack Engineer',
-      company: 'Adobe',
-      period: 'June 2021 - Present',
-      year: '2021',
-      location: 'San Francisco, CA',
-      description: 'Engineered core ecommerce solutions for Generative AI assets, modernized customer checkout flows, and led development of modular commerce systems.',
-      achievements: [
-        { metric: '1.5%', description: 'of total stock revenue from AI assets', icon: <DollarSign className="w-4 h-4" /> },
-        { metric: '+18%', description: 'Customer retention boost', icon: <Users className="w-4 h-4" /> },
-        { metric: '83%', description: 'Reduced integration effort', icon: <Target className="w-4 h-4" /> },
-        { metric: '$1.5M', description: 'GNARR boost from Plans page', icon: <DollarSign className="w-4 h-4" /> }
-      ],
-      responsibilities: [
-        { text: 'Engineered core ecommerce solutions for Generative AI assets, enabling merchandising and licensing which now accounts for 1.5% of total stock revenue', icon: <Code className="w-4 h-4" /> },
-        { text: 'Updated Checkout API for real-time content ID fetching via centralized licensing module and GraphQL, ensuring seamless integration across all Stock 2.0 surfaces', icon: <Zap className="w-4 h-4" /> },
-        { text: 'Spearheaded comprehensive modernization and redesign of customer checkout flow (frontend & backend), integrating new customer segments and diverse payment providers', icon: <Globe className="w-4 h-4" /> },
-        { text: 'Streamlined Adobe Stock\'s checkout integration across web & desktop apps by developing modular, self-contained commerce component system', icon: <Target className="w-4 h-4" /> },
-        { text: 'Led modernization of Adobe Stock\'s Plans page to dynamically rendered, accessible platform via Franklin Headless Framework and Adobe Spectrum', icon: <Shield className="w-4 h-4" /> }
-      ],
-      technologies: ['React', 'Node.js', 'TypeScript', 'GraphQL', 'Adobe Spectrum', 'Franklin Framework', 'Python', 'Java', 'Express', 'Microservices'],
-      type: 'work',
-      color: 'from-red-500 to-orange-500',
-      accent: 'red'
-    },
-    {
-      id: 'manifesthq',
-      title: 'Front End Developer',
-      company: 'ManifestHQ',
-      period: 'May 2020 - May 2021',
-      year: '2020',
-      location: 'Chicago, IL',
-      description: 'Led development of responsive React.js web app for 401k retirement funds transfers, architected reusable UI library.',
-      achievements: [
-        { metric: '80%', description: 'Reduced transfer time', icon: <TrendingUp className="w-4 h-4" /> },
-        { metric: '80%', description: 'Test coverage for UI library', icon: <Target className="w-4 h-4" /> },
-        { metric: '100%', description: 'Mobile-first responsive design', icon: <Globe className="w-4 h-4" /> }
-      ],
-      responsibilities: [
-        { text: 'Led development of responsive, mobile-first React.js web app (TypeScript, Node.js, Styled Components) for 401k retirement funds transfers', icon: <Code className="w-4 h-4" /> },
-        { text: 'Architected reusable UI library (npm package, Storybook) with comprehensive test coverage, ensuring consistency and maintainability', icon: <Target className="w-4 h-4" /> },
-        { text: 'Established and managed continuous deployment pipelines from Bitbucket to AWS S3, integrating React frontend with Spring Boot backend', icon: <Zap className="w-4 h-4" /> },
-        { text: 'Translated business & user requirements into technical specifications through collaboration with CTO and UX teams', icon: <Users className="w-4 h-4" /> }
-      ],
-      technologies: ['React', 'TypeScript', 'Node.js', 'Styled Components', 'Storybook', 'AWS S3', 'Spring Boot', 'REST APIs', 'Bitbucket'],
-      type: 'work',
-      color: 'from-blue-600 to-indigo-600',
-      accent: 'blue'
-    },
-    {
-      id: 'udacity',
-      title: 'Project Reviewer & Classroom Mentor',
-      company: 'Udacity',
-      period: 'February 2017 - July 2019',
-      year: '2017',
-      location: 'Bangalore, India',
-      description: 'Reviewed student projects for Data Scientist Nanodegree and mentored batches of 30 students.',
-      achievements: [
-        { metric: '500+', description: 'Projects reviewed', icon: <Target className="w-4 h-4" /> },
-        { metric: '30', description: 'Students per batch', icon: <Users className="w-4 h-4" /> },
-        { metric: '95%', description: 'Student satisfaction', icon: <TrendingUp className="w-4 h-4" /> }
-      ],
-      responsibilities: [
-        { text: 'Reviewed student projects for Udacity\'s Data Scientist Nanodegree, ensuring high-quality deliverables and learning outcomes', icon: <Target className="w-4 h-4" /> },
-        { text: 'Mentored batches of 30 students, providing personalized guidance and support throughout their learning journey', icon: <Users className="w-4 h-4" /> },
-        { text: 'Improved student engagement and graduation rates through effective teaching methodologies and mentorship', icon: <TrendingUp className="w-4 h-4" /> },
-        { text: 'Contributed to curriculum development and assessment strategies for Data Science education', icon: <Code className="w-4 h-4" /> }
-      ],
-      technologies: ['Python', 'Data Science', 'Machine Learning', 'Mentoring', 'Curriculum Development', 'Assessment'],
-      type: 'education',
-      color: 'from-purple-600 to-pink-600',
-      accent: 'purple'
-    },
-    {
-      id: 'ibm',
-      title: 'Software Engineer',
-      company: 'IBM',
-      period: 'March 2016 - July 2019',
-      year: '2016',
-      location: 'Bangalore, India',
-      description: 'Championed Agile methodologies across full SDLC, pioneered web automation framework.',
-      achievements: [
-        { metric: '70%', description: 'Testing time reduction', icon: <TrendingUp className="w-4 h-4" /> },
-        { metric: '90%', description: 'Data validation time saved', icon: <Target className="w-4 h-4" /> },
-        { metric: '5+', description: 'Enterprise applications delivered', icon: <Globe className="w-4 h-4" /> }
-      ],
-      responsibilities: [
-        { text: 'Championed Agile Methodologies across full SDLC, crafting enterprise applications with Microservices architecture and Object-Oriented design', icon: <Code className="w-4 h-4" /> },
-        { text: 'Pioneered innovative solutions, including new web automation framework for Telecom Client, shortening testing time by 70%', icon: <Zap className="w-4 h-4" /> },
-        { text: 'Authored custom Data Management Tool using Python & Java, minimizing data validation time by 90%, resulting in faster project turnaround', icon: <Target className="w-4 h-4" /> },
-        { text: 'Architected and implemented comprehensive Unit, Regression, and Integration test scripts; engineered responsive UI features in React', icon: <Shield className="w-4 h-4" /> }
-      ],
-      technologies: ['Python', 'Java', 'Node.js', 'Express', 'React', 'Microservices', 'Agile', 'HTML', 'CSS', 'Testing'],
-      type: 'work',
-      color: 'from-blue-800 to-blue-900',
-      accent: 'blue'
-    },
-  ]
+  const timelineData = experience
 
   // Check if mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -151,11 +33,11 @@ const Timeline = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return
-      
+
       const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
       const maxScroll = scrollHeight - clientHeight
       const progress = maxScroll > 0 ? scrollTop / maxScroll : 0
-      
+
 
       setActiveIndex(Math.min(Math.floor(progress * timelineData.length), timelineData.length - 1))
     }
@@ -221,7 +103,7 @@ const Timeline = () => {
                     {isMobile && index < timelineData.length - 1 && (
                       <div className="absolute left-4 top-16 w-0.5 h-16 bg-gradient-to-b from-blue-500/20 to-transparent" />
                     )}
-                    <div className={`${!isMobile ? 
+                    <div className={`${!isMobile ?
                       `relative overflow-hidden rounded-2xl bg-white/90 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/60 dark:border-gray-500/50 shadow-sm hover:shadow-md` :
                       ''}`}>
                       <div className={`${!isMobile ? 'p-4' : ''} relative z-10`}>
@@ -251,7 +133,7 @@ const Timeline = () => {
                                 </h3>
                               </div>
                             </div>
-                            
+
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
                               <span className="flex items-center gap-1.5">
                                 <Calendar className="w-3 h-3" />
@@ -280,15 +162,15 @@ const Timeline = () => {
                               <div
                                 key={achievementIndex}
                                 className={`group/achievement relative overflow-hidden rounded-lg transition-all duration-300 ${
-                                  !isMobile 
-                                    ? `bg-gray-50/80 dark:bg-gray-800/40 backdrop-blur-sm border border-gray-200/60 dark:border-gray-600/60 hover:border-gray-300/80 dark:hover:border-gray-500/80 hover:bg-gray-100/90 dark:hover:bg-gray-800/60` 
+                                  !isMobile
+                                    ? `bg-gray-50/80 dark:bg-gray-800/40 backdrop-blur-sm border border-gray-200/60 dark:border-gray-600/60 hover:border-gray-300/80 dark:hover:border-gray-500/80 hover:bg-gray-100/90 dark:hover:bg-gray-800/60`
                                     : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                                 } cursor-help p-2`}
                                 title={achievement.description}
                               >
                                 <div className="relative z-10 flex items-center gap-2">
                                   <div className={`flex-shrink-0 p-1 rounded-md bg-white dark:bg-gray-800 shadow-sm ${getAccentColor(item.accent)}`}>
-                                    {achievement.icon}
+                                    {renderIcon(achievement.iconName)}
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div className={`font-bold text-gray-900 dark:text-white ${isMobile ? 'text-sm' : 'text-sm'} mb-0.5`}>
@@ -313,8 +195,8 @@ const Timeline = () => {
                               <span
                                 key={tech}
                                 className={`px-2 py-1 font-medium rounded-md transition-all duration-200 ${
-                                  !isMobile 
-                                    ? `bg-gray-100/80 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-600/60 hover:border-gray-300/80 dark:hover:border-gray-500/80 hover:bg-gray-200/90 dark:hover:bg-gray-800/60` 
+                                  !isMobile
+                                    ? `bg-gray-100/80 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-600/60 hover:border-gray-300/80 dark:hover:border-gray-500/80 hover:bg-gray-200/90 dark:hover:bg-gray-800/60`
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300'
                                 } cursor-default text-xs`}
                               >
@@ -340,38 +222,38 @@ const Timeline = () => {
                   </h3>
                   <div className="w-6 h-px bg-gradient-to-r from-blue-400 to-blue-500 rounded-full mx-auto" />
                 </div>
-                
+
                 <div className="space-y-6">
                   {timelineData.map((item, index) => {
                     const isCurrent = activeIndex === index
-                    
+
                     return (
                       <div key={item.id} className="relative">
                         {index < timelineData.length - 1 && (
                           <div className="absolute left-6 top-12 w-px h-12">
-                            <div 
+                            <div
                               className={`w-full h-full transition-all duration-500 ease-out ${
-                                isCurrent 
-                                  ? 'bg-gradient-to-b from-blue-400 to-blue-300' 
+                                isCurrent
+                                  ? 'bg-gradient-to-b from-blue-400 to-blue-300'
                                   : 'bg-gray-200 dark:bg-gray-600'
                               }`}
                             />
                           </div>
                         )}
-                        
+
                         <button
                           onClick={() => scrollToItem(index)}
                           className={`group relative flex items-center gap-3 p-2 rounded-lg transition-all duration-300 ease-out cursor-pointer ${
-                            isCurrent 
-                              ? 'bg-white/80 dark:bg-gray-800/60 backdrop-blur-sm border border-blue-200/40 dark:border-blue-700/30 shadow-sm' 
+                            isCurrent
+                              ? 'bg-white/80 dark:bg-gray-800/60 backdrop-blur-sm border border-blue-200/40 dark:border-blue-700/30 shadow-sm'
                               : 'hover:bg-white/50 dark:hover:bg-gray-800/30 backdrop-blur-sm border border-transparent hover:border-gray-200/30 dark:hover:border-gray-700/20'
                           }`}
                         >
                           <div className="relative">
-                            <div 
+                            <div
                               className={`w-3 h-3 rounded-full transition-all duration-300 ease-out ${
-                                isCurrent 
-                                  ? 'bg-blue-500 scale-110 shadow-sm' 
+                                isCurrent
+                                  ? 'bg-blue-500 scale-110 shadow-sm'
                                   : 'bg-gray-300 dark:bg-gray-600 group-hover:bg-gray-400 dark:group-hover:bg-gray-500'
                               }`}
                             />
@@ -379,21 +261,21 @@ const Timeline = () => {
                               <div className="absolute inset-0 w-3 h-3 bg-blue-500 rounded-full animate-ping opacity-50" />
                             )}
                           </div>
-                          
+
                           <div className="text-left min-w-0">
-                            <span 
+                            <span
                               className={`text-lg font-semibold transition-all duration-300 ${
-                                isCurrent 
-                                  ? 'text-blue-600 dark:text-blue-400' 
+                                isCurrent
+                                  ? 'text-blue-600 dark:text-blue-400'
                                   : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'
                               }`}
                             >
                               {item.year}
                             </span>
-                            <div 
+                            <div
                               className={`text-xs font-medium transition-all duration-300 truncate ${
-                                isCurrent 
-                                  ? 'text-blue-500 dark:text-blue-300' 
+                                isCurrent
+                                  ? 'text-blue-500 dark:text-blue-300'
                                   : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-500'
                               }`}
                             >

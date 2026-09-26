@@ -1,10 +1,43 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Menu, X, Sun, Moon } from 'lucide-react'
 import CuteAnimalEyes from './CuteAnimalEyes'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+
+  const handleMenuKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!isMenuOpen || !menuRef.current) return
+    if (e.key === 'Escape') {
+      setIsMenuOpen(false)
+      menuButtonRef.current?.focus()
+      return
+    }
+    if (e.key !== 'Tab') return
+
+    const focusableElements = menuRef.current.querySelectorAll<HTMLElement>(
+      'button, a[href], [tabindex]:not([tabindex="-1"])'
+    )
+    const first = focusableElements[0]
+    const last = focusableElements[focusableElements.length - 1]
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }, [isMenuOpen])
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.addEventListener('keydown', handleMenuKeyDown)
+    }
+    return () => document.removeEventListener('keydown', handleMenuKeyDown)
+  }, [isMenuOpen, handleMenuKeyDown])
 
   useEffect(() => {
     // Check if user has explicitly set a preference
@@ -82,6 +115,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleDarkMode}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               className="flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
@@ -90,7 +124,11 @@ const Header = () => {
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
                 className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -101,7 +139,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
+          <div className="md:hidden" ref={menuRef} id="mobile-menu" role="navigation" aria-label="Mobile navigation">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
               {navItems.map((item) => (
                 <button

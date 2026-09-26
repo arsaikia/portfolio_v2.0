@@ -1,45 +1,43 @@
-import './App.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, lazy, Suspense } from 'react'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import About from './components/About'
-import Skills from './components/Skills'
-import Projects from './components/Projects'
-import Contact from './components/Contact'
-import Footer from './components/Footer'
 import SEOHead from './components/SEOHead'
-import Analytics from './components/Analytics'
 import MobileOptimizations from './components/MobileOptimizations'
+
+const Skills = lazy(() => import('./components/Skills'))
+const Projects = lazy(() => import('./components/Projects'))
+const Contact = lazy(() => import('./components/Contact'))
+const Footer = lazy(() => import('./components/Footer'))
 
 function App() {
   const appRef = useRef<HTMLDivElement>(null)
   const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
-    let mouseX = 0
-    let mouseY = 0
+    let idleTimer: ReturnType<typeof setTimeout>
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX
-      mouseY = e.clientY
-    }
-
-    const updateGlowPosition = () => {
       if (appRef.current) {
-        appRef.current.style.setProperty('--glow-x', `${mouseX}px`)
-        appRef.current.style.setProperty('--glow-y', `${mouseY}px`)
+        appRef.current.style.setProperty('--glow-x', `${e.clientX}px`)
+        appRef.current.style.setProperty('--glow-y', `${e.clientY}px`)
       }
-      rafRef.current = requestAnimationFrame(updateGlowPosition)
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
+
+      clearTimeout(idleTimer)
+      idleTimer = setTimeout(() => {
+        rafRef.current = null
+      }, 100)
     }
 
-    // Add event listener to the window for global tracking
     window.addEventListener('mousemove', handleMouseMove)
-    
-    // Start the animation loop
-    updateGlowPosition()
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
+      clearTimeout(idleTimer)
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
       }
@@ -56,25 +54,39 @@ function App() {
       } as React.CSSProperties}
     >
       <SEOHead />
-      <Analytics />
       <MobileOptimizations />
       {/* Global Cursor Glow Effect */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute w-[25rem] h-[25rem] rounded-full glow-effect"></div>
       </div>
       
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       <div className="relative z-10">
         <Header />
-        <main>
+        <main id="main-content">
           <Hero />
           <About />
-          <Skills />
-          <div data-projects-grid>
-            <Projects />
-          </div>
-          <Contact />
+          <Suspense fallback={<div className="py-20" />}>
+            <Skills />
+          </Suspense>
+          <Suspense fallback={<div className="py-20" />}>
+            <div data-projects-grid>
+              <Projects />
+            </div>
+          </Suspense>
+          <Suspense fallback={<div className="py-20" />}>
+            <Contact />
+          </Suspense>
         </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { ExternalLink, Github, Calendar, Users, Play, X, Code2 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
+import { projects } from '../data/projects'
 
 const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
@@ -13,7 +14,7 @@ const Projects = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -38,7 +39,7 @@ const Projects = () => {
           })
         })
       },
-      { threshold: 0.5 } // Trigger when 50% of the card is visible
+      { threshold: 0.5 }
     )
 
     projectRefs.current.forEach((ref) => {
@@ -47,89 +48,6 @@ const Projects = () => {
 
     return () => observer.disconnect()
   }, [isMobile])
-
-
-
-  const projects = [
-    {
-      title: 'Prep-Algo',
-      description: 'A comprehensive platform for practicing algorithm problems with real-time code execution, test cases, and performance analysis. Features interactive coding environment and progress tracking.',
-      image: '⚡',
-      demoImage: '/prep-algo-demo.png',
-      demoVideo: '',
-      technologies: ['JavaScript', 'React', 'Node.js', 'Express', 'MongoDB'],
-      features: ['Code Execution', 'Test Cases', 'Progress Tracking', 'Performance Analysis'],
-      demoLink: 'https://prepalgo.com',
-      githubLink: 'https://github.com/arsaikia/prep-algo',
-      period: '2023 - Present',
-      team: 'Solo Project'
-    },
-    {
-      title: 'Pathfinding Visualizer',
-      description: 'Interactive visualization tool for various pathfinding algorithms including Dijkstra, A*, and BFS. Features real-time algorithm execution with customizable grid and obstacles.',
-      image: '🧭',
-      demoImage: '/pathfinding-demo.png',
-      demoVideo: '/pathfinding-demo.gif',
-      technologies: ['JavaScript', 'HTML5', 'CSS3', 'Canvas API'],
-      features: ['Multiple Algorithms', 'Real-time Visualization', 'Customizable Grid', 'Performance Metrics'],
-      demoLink: '#',
-      githubLink: 'https://github.com/arsaikia/Pathfinding_Visualizer',
-      period: '2022',
-      team: 'Solo Project'
-    },
-    {
-      title: 'Algorithm Visualizer',
-      description: 'Educational platform for visualizing sorting and searching algorithms with step-by-step execution and performance comparisons.',
-      image: '📊',
-      demoImage: '/algorithm-demo.png',
-      demoVideo: '/algorithm-demo.gif',
-      technologies: ['JavaScript', 'React', 'D3.js', 'CSS3'],
-      features: ['Sorting Algorithms', 'Searching Algorithms', 'Step-by-step Execution', 'Performance Comparison'],
-      demoLink: 'https://arsaikia.github.io/AlgorithmVisualizer/',
-      githubLink: 'https://github.com/arsaikia/AlgorithmVisualizer',
-      period: '2022',
-      team: 'Solo Project'
-    },
-    {
-      title: 'Human Activity Recognition',
-      description: 'Machine Learning project for recognizing human activities using smartphone sensor data. Part of Udacity\'s Machine Learning Engineer Nanodegree Program.',
-      image: '🤖',
-      demoImage: '',
-      demoVideo: '',
-      technologies: ['Python', 'Jupyter Notebook', 'Scikit-learn', 'Pandas', 'NumPy'],
-      features: ['Sensor Data Processing', 'Feature Engineering', 'Model Training', 'Activity Classification'],
-      demoLink: '#',
-      githubLink: 'https://github.com/arsaikia/MLND_Capstone_Human_Activity_Recognition_Using_Smartphones_Sensor_Data',
-      period: '2021',
-      team: 'Academic Project'
-    },
-    {
-      title: 'Ecommerce application with purchase recommendation system',
-      description: 'Web application project demonstrating modern web development practices with responsive design and interactive features.',
-      image: '🌐',
-      demoImage: '',
-      demoVideo: '',
-      technologies: ['JavaScript', 'HTML5', 'CSS3', 'Web APIs'],
-      features: ['Responsive Design', 'Interactive UI', 'Modern Web Standards', 'Cross-browser Compatibility'],
-      demoLink: '#',
-      githubLink: 'https://github.com/arsaikia/EWA_Term_Project',
-      period: '2021',
-      team: 'Academic Project'
-    },
-    {
-      title: 'Hacktober-Bit_Lords',
-      description: 'First-place winning hackathon project for Code Platoon\'s Hacktober 2020. Built a solution to help Illinois Joining Forces (IJF) create a more efficient way to gather resource provider data and distribute information to Illinois state Veterans.',
-      image: '🏆',
-      demoImage: '',
-      demoVideo: '',
-      technologies: ['JavaScript', 'Python', 'CSS', 'Backend', 'Frontend'],
-      features: ['Veteran Resource Management', 'Data Distribution', 'Efficient Referrals', 'Hackathon Winner'],
-      demoLink: '#',
-      githubLink: 'https://github.com/arsaikia/Hacktober-Bit_Lords-',
-      period: 'October 2020',
-      team: 'Bit Lords Team (5 members)'
-    }
-  ]
 
   return (
     <section id="projects" className="py-20 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm">
@@ -157,17 +75,27 @@ const Projects = () => {
               <div className="h-48 bg-gradient-to-br from-gray-50/80 to-blue-50/60 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden">
                 {/* Cover Image or Demo */}
                 {project.demoImage || project.demoVideo ? (
-                  <img 
-                    src={
-                      isMobile && visibleProjects.has(index) && project.demoVideo
-                        ? project.demoVideo
-                        : project.demoImage
-                          ? project.demoImage
-                          : project.demoVideo // fallback to GIF if no image
-                    }
-                    alt={`${project.title}`}
-                    className={`w-full h-full object-cover transition-all duration-300 ${!isMobile && hoveredProject === index && project.demoVideo ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
-                  />
+                  <>
+                    {isMobile && visibleProjects.has(index) && project.demoVideo ? (
+                      <video
+                        src={project.demoVideo}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={project.demoImage || project.demoVideo}
+                        alt={`Screenshot of ${project.title} - ${project.description.split('.')[0]}`}
+                        loading="lazy"
+                        width={400}
+                        height={192}
+                        className={`w-full h-full object-cover transition-all duration-300 ${!isMobile && hoveredProject === index && project.demoVideo ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+                      />
+                    )}
+                  </>
                 ) : project.image ? (
                   <div className="flex flex-col items-center justify-center w-full h-full text-5xl text-gray-400 dark:text-gray-600">
                     <span className="text-6xl">{project.image}</span>
@@ -180,9 +108,12 @@ const Projects = () => {
                 {/* Play Demo Button (Desktop) - Only show if demo video exists */}
                 {!isMobile && hoveredProject === index && project.demoVideo && (
                   <div className="absolute inset-0 transition-all duration-300 opacity-100">
-                    <img 
-                      src={project.demoVideo} 
-                      alt={`${project.title} Demo`}
+                    <video
+                      src={project.demoVideo}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
@@ -321,7 +252,8 @@ const Projects = () => {
                 <div className="flex items-center justify-center mb-6">
                   <img 
                     src={projects[selectedDemo].demoImage} 
-                    alt={`${projects[selectedDemo].title} Demo`}
+                    alt={`Demo screenshot of ${projects[selectedDemo].title}`}
+                    loading="lazy"
                     className="max-w-full max-h-[30vh] object-contain rounded-lg"
                   />
                 </div>

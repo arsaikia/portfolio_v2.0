@@ -1,30 +1,13 @@
 import { Mail, Phone, Linkedin, Github } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { contactInfo, socialLinks } from '../data/contact'
+
+const iconMap = { Mail, Phone, Linkedin, Github } as const
 
 const Contact = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [animatedItems, setAnimatedItems] = useState<{[key: string]: boolean}>({})
   const sectionRef = useRef<HTMLDivElement>(null)
-
-  const contactInfo = [
-    {
-      icon: <Mail className="w-6 h-6" />,
-      title: 'Email',
-      value: 'arunabhsaikia.official@gmail.com',
-      link: 'mailto:arunabhsaikia.official@gmail.com'
-    },
-    {
-      icon: <Phone className="w-6 h-6" />,
-      title: 'Phone',
-      value: '+1 (312) 539-7699',
-      link: 'tel:+13125397699'
-    }
-  ]
-
-  const socialLinks = [
-    { icon: <Linkedin className="w-6 h-6" />, name: 'LinkedIn', url: 'https://www.linkedin.com/in/arsaikia/' },
-    { icon: <Github className="w-6 h-6" />, name: 'GitHub', url: 'https://github.com/arsaikia/' },
-  ]
 
   // Intersection Observer for scroll-triggered animations
   useEffect(() => {
@@ -109,7 +92,7 @@ const Contact = () => {
                         style={{ transitionDelay: `${index * 200}ms` }}
                       >
                         <div className="flex-shrink-0 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
-                          {info.icon}
+                          {(() => { const Icon = iconMap[info.iconName]; return <Icon className="w-6 h-6" />; })()}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg mb-1">
@@ -149,7 +132,7 @@ const Contact = () => {
                           aria-label={social.name}
                         >
                           <div className="flex-shrink-0">
-                            {social.icon}
+                            {(() => { const Icon = iconMap[social.iconName]; return <Icon className="w-6 h-6" />; })()}
                           </div>
                           <span className="font-medium text-sm sm:text-base">{social.name}</span>
                         </a>
@@ -173,12 +156,12 @@ const Contact = () => {
                   <div className="absolute inset-0 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
                 </div>
                 <span className="text-green-600 dark:text-green-400 font-semibold text-sm sm:text-base">
-                  Available for new opportunities
+                  Open to connecting
                 </span>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
-                I'm currently open to discussing new full-time positions, consulting 
-                opportunities, or interesting project collaborations.
+                I'm always happy to chat about interesting projects, technical challenges,
+                or collaboration opportunities. Feel free to reach out!
               </p>
             </div>
           </div>

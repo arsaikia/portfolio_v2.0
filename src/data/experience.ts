@@ -25,6 +25,8 @@ export interface ExperienceEntry {
   accent: string
   /** Role changes within the same company, oldest first. */
   progression?: { title: string; year: string }[]
+  /** Remote role: the rail shows "Remote" instead of the city. */
+  remote?: boolean
 }
 
 export const experience: ExperienceEntry[] = [
@@ -112,6 +114,7 @@ export const experience: ExperienceEntry[] = [
     period: 'February 2017 - July 2019',
     year: '2017',
     location: 'Bangalore, India',
+    remote: true,
     description: 'Reviewed student projects for Data Scientist Nanodegree and mentored batches of 30 students.',
     achievements: [
       { metric: '500+', description: 'Projects reviewed', iconName: 'Target' },

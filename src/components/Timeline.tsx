@@ -403,6 +403,31 @@ const buildTail = (count: number) => {
   return `M ${x} ${y} C ${x + dx * 0.6} ${y + TAIL * 0.4}, ${ROAD_CX} ${y + TAIL * 0.6}, ${ROAD_CX - 2} ${y + TAIL}`
 }
 
+/* Travel icons (drawn pointing right, +x = direction of travel; ~14px before scaling) */
+const ICON_SCALE = 1.5
+const ARROW_PATH = 'M6.5 0 L-4.5 -5 L-2.2 0 L-4.5 5 Z'
+const PLANE_PATH =
+  'M7 0 L2 -1.3 L-1.2 -6.2 L-2.8 -6.2 L-0.8 -1.3 L-4.4 -1.1 L-5.8 -3.2 L-6.9 -3.2 L-6.1 0 L-6.9 3.2 L-5.8 3.2 L-4.4 1.1 L-0.8 1.3 L-2.8 6.2 L-1.2 6.2 L2 1.3 Z'
+const FOOTPRINTS = 6
+/** Fraction of a leg (either side of a stop) over which icons cross-fade. */
+const SWAP_WINDOW = 0.14
+
+type LegIcon = 'arrow' | 'plane' | 'cap'
+const cityOf = (location: string) => location.split(',')[0].trim()
+
+/** One icon per leg (items newest first): plane when the city changes, cap graduating into work, else walking. */
+const legIcons = (items: ExperienceEntry[]): LegIcon[] =>
+  items.slice(0, -1).map((item, i) => {
+    const next = items[i + 1]
+    if (cityOf(item.location) !== cityOf(next.location)) return 'plane'
+    if (next.type === 'education' && item.type === 'work') return 'cap'
+    return 'arrow'
+  })
+
+const smoothstep = (t: number) => t * t * (3 - 2 * t)
+/** Shortest-arc angle interpolation, in degrees. */
+const lerpAngle = (from: number, to: number, k: number) => from + ((((to - from + 540) % 360) + 360) % 360 - 180) * k
+
 interface RoadNavProps {
   items: ExperienceEntry[]
   activeIndex: number
@@ -418,11 +443,16 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
   const height = stopY(items.length - 1) + STOP_GAP / 2
   const trailRef = useRef<SVGPathElement>(null)
   const markerRef = useRef<SVGGElement>(null)
+  const arrowRef = useRef<SVGGElement>(null)
+  const planeRef = useRef<SVGGElement>(null)
+  const capRef = useRef<SVGGElement>(null)
+  const shadowRef = useRef<SVGEllipseElement>(null)
+  const printsRef = useRef<SVGGElement>(null)
+  const legs = useMemo(() => legIcons(items), [items])
   const stopLengths = useRef<number[]>([])
   const total = useRef(0)
   const current = useRef(progress)
   const target = useRef(progress)
-  const glowId = useId()
   const tailFadeId = useId()
 
   /* Cache path length at each stop (y is monotonic along the road) */
@@ -454,16 +484,82 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
     if (!path || !marker || typeof path.getPointAtLength !== 'function') return
 
     let raf = 0
+    let prevLen: number | null = null
+    let dir = 1
+    let rot = 90
+    let walk = 0
+    const mix: Record<LegIcon, number> = { arrow: 1, plane: 0, cap: 0 }
+
     const paint = () => {
       const stops = stopLengths.current
       if (stops.length === 0 || total.current === 0) return
+      const L = total.current
       const p = Math.max(0, Math.min(items.length - 1, current.current))
       const i = Math.min(Math.floor(p), items.length - 2)
       const f = p - i
       const len = items.length > 1 ? stops[i] + (stops[i + 1] - stops[i]) * f : 0
       const pt = path.getPointAtLength(len)
-      path.style.strokeDashoffset = String(total.current - len)
+      path.style.strokeDashoffset = String(L - len)
       marker.setAttribute('transform', `translate(${pt.x} ${pt.y})`)
+      if (legs.length === 0) return
+
+      // Direction of travel along the road
+      const ahead = path.getPointAtLength(Math.min(L, len + 1.5))
+      const behind = path.getPointAtLength(Math.max(0, len - 1.5))
+      const angle = (Math.atan2(ahead.y - behind.y, ahead.x - behind.x) * 180) / Math.PI
+      const dl = prevLen === null ? 0 : len - prevLen
+      prevLen = len
+      if (Math.abs(dl) > 0.05) dir = dl > 0 ? 1 : -1
+      rot = reduced ? (dir > 0 ? angle : angle + 180) : lerpAngle(rot, dir > 0 ? angle : angle + 180, 0.2)
+
+      // Each leg holds one icon; swap only around the stops
+      const nearest = Math.round(p)
+      const offset = p - nearest
+      const before = legs[Math.max(0, Math.min(legs.length - 1, nearest - 1))]
+      const after = legs[Math.max(0, Math.min(legs.length - 1, nearest))]
+      const t = Math.abs(offset) >= SWAP_WINDOW ? (offset < 0 ? 0 : 1) : (offset + SWAP_WINDOW) / (2 * SWAP_WINDOW)
+      const want: Record<LegIcon, number> = { arrow: 0, plane: 0, cap: 0 }
+      want[before] += 1 - smoothstep(t)
+      want[after] += smoothstep(t)
+      ;(Object.keys(mix) as LegIcon[]).forEach((k) => {
+        mix[k] = reduced ? want[k] : mix[k] + (want[k] - mix[k]) * 0.25
+      })
+
+      const now = performance.now() / 600
+      const bank = reduced ? 0 : Math.max(-1, Math.min(1, dl * 1.5)) * 8
+      const lift = mix.plane * 8
+      const size = (w: number) => ICON_SCALE * (0.6 + 0.4 * w)
+
+      arrowRef.current?.setAttribute('opacity', mix.arrow.toFixed(3))
+      arrowRef.current?.setAttribute('transform', `rotate(${rot}) scale(${size(mix.arrow)})`)
+      planeRef.current?.setAttribute('opacity', mix.plane.toFixed(3))
+      planeRef.current?.setAttribute('transform', `translate(0 ${-lift}) rotate(${rot + bank}) scale(${size(mix.plane)})`)
+      capRef.current?.setAttribute('opacity', mix.cap.toFixed(3))
+      capRef.current?.setAttribute(
+        'transform',
+        reduced
+          ? `scale(${size(mix.cap)})`
+          : `translate(0 ${Math.sin(now) * 0.6}) rotate(${-8 + Math.sin(now * 0.8) * 3}) scale(${size(mix.cap)})`,
+      )
+      shadowRef.current?.setAttribute('opacity', (0.16 * mix.plane).toFixed(3))
+      shadowRef.current?.setAttribute('rx', String((5 - 2 * mix.plane) * ICON_SCALE))
+
+      // Footprints: only while walking and moving
+      const prints = printsRef.current
+      if (prints) {
+        walk += ((Math.abs(dl) > 0.02 && !reduced ? 1 : 0) * mix.arrow - walk) * 0.08
+        const rad = ((angle + 90) * Math.PI) / 180
+        Array.from(prints.children).forEach((el, k) => {
+          const q = path.getPointAtLength(Math.max(0, Math.min(L, len - dir * (13 + k * 5))))
+          const side = (k % 2 ? 1 : -1) * 2.2
+          const x = q.x + Math.cos(rad) * side
+          const y = q.y + Math.sin(rad) * side
+          el.setAttribute('cx', x.toFixed(2))
+          el.setAttribute('cy', y.toFixed(2))
+          el.setAttribute('transform', `rotate(${angle + 90} ${x.toFixed(2)} ${y.toFixed(2)})`)
+          el.setAttribute('opacity', ((0.5 - k * 0.075) * walk).toFixed(3))
+        })
+      }
     }
 
     const loop = () => {
@@ -476,7 +572,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
     // Wait a frame so stop lengths are measured first
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [items.length, reduced])
+  }, [items.length, legs, reduced])
 
   const activeHex = getAccent(items[activeIndex]?.accent ?? 'blue').hex
 
@@ -500,9 +596,6 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
             <stop offset="0" stopColor="currentColor" stopOpacity={0.9} />
             <stop offset="1" stopColor="currentColor" stopOpacity={0} />
           </linearGradient>
-          <filter id={glowId} x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="3" />
-          </filter>
         </defs>
 
         {/* Road: faint track with a dotted centre line */}
@@ -549,38 +642,51 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           return (
             <g key={item.id} transform={`translate(${stopX(i)} ${stopY(i)})`}>
               <circle
-                r={isActive ? 10 : 0}
+                r={isActive ? 7 : 0}
                 fill={hex}
-                opacity={0.14}
+                opacity={0.12}
                 style={{ transition: reduced ? 'none' : `r 420ms ${EASE_STATE}` }}
               />
               <circle
-                r={4.5}
-                fill={isActive ? hex : 'currentColor'}
-                strokeWidth={2}
-                className="text-gray-300 dark:text-gray-600 stroke-gray-50 dark:stroke-gray-900"
-                style={{ transition: reduced ? 'none' : `fill 320ms ${EASE_STATE}` }}
+                r={2.75}
+                strokeWidth={1.1}
+                className={isActive ? '' : 'fill-gray-50 dark:fill-gray-900 stroke-gray-300 dark:stroke-gray-600'}
+                style={{
+                  ...(isActive ? { fill: hex, stroke: hex } : {}),
+                  transition: reduced ? 'none' : `fill 320ms ${EASE_STATE}, stroke 320ms ${EASE_STATE}`,
+                }}
               />
             </g>
           )
         })}
 
-        {/* Travelling marker */}
-        <g ref={markerRef} transform={`translate(${stopX(0)} ${stopY(0)})`}>
-          <circle
-            r={8}
-            fill={activeHex}
-            opacity={0.3}
-            filter={`url(#${glowId})`}
-            style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}
-          />
-          <circle
-            r={5.5}
-            fill="white"
-            stroke={activeHex}
-            strokeWidth={2.5}
-            style={{ transition: reduced ? 'none' : `stroke 420ms ${EASE_STATE}` }}
-          />
+        {/* Footprints behind the walking marker */}
+        <g ref={printsRef} fill={activeHex} style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}>
+          {Array.from({ length: FOOTPRINTS }, (_, k) => (
+            <ellipse key={k} rx={1.6} ry={2.4} opacity={0} />
+          ))}
+        </g>
+
+        {/* Travelling marker: arrow (walking) ⇄ plane (relocation) ⇄ cap (school) */}
+        <g
+          ref={markerRef}
+          transform={`translate(${stopX(0)} ${stopY(0)})`}
+          fill={activeHex}
+          style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}
+        >
+          <ellipse ref={shadowRef} rx={7.5} ry={1.8} opacity={0} className="fill-gray-900 dark:fill-black" />
+          <g ref={arrowRef} transform={`rotate(90) scale(${ICON_SCALE})`}>
+            <path d={ARROW_PATH} strokeWidth={1.2} strokeLinejoin="round" className="stroke-gray-50 dark:stroke-gray-900" />
+          </g>
+          <g ref={planeRef} opacity={0}>
+            <path d={PLANE_PATH} strokeWidth={0.8} className="stroke-gray-50 dark:stroke-gray-900" />
+          </g>
+          <g ref={capRef} opacity={0}>
+            <path d="M0 -4.5 L7.5 -1.2 L0 2.1 L-7.5 -1.2 Z" />
+            <path d="M-4.2 0.4 L-4.2 3.2 Q0 5.4 4.2 3.2 L4.2 0.4 L0 2.3 Z" opacity={0.85} />
+            <path d="M5.6 -0.6 L5.6 3.6" fill="none" strokeWidth={1} stroke={activeHex} />
+            <circle cx={5.6} cy={4} r={0.9} />
+          </g>
         </g>
       </svg>
 
@@ -615,7 +721,9 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
                   >
                     {item.company}
                   </span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                    {item.period} · {item.remote ? 'Remote' : cityOf(item.location)}
+                  </span>
                 </span>
               </button>
             </li>

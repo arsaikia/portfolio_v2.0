@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import {
   Calendar,
   MapPin,
@@ -40,6 +40,84 @@ const logoMap: Record<string, string> = {
 
 const typeIcon = (type: ExperienceEntry['type'], className = 'w-4 h-4') =>
   type === 'education' ? <Award className={className} /> : <Briefcase className={className} />
+
+/* -------------------------------------------------------------------------- */
+/*  Rail identity: one distinct year gradient per entry.                       */
+/*  Accents are shared (ManifestHQ + IBM are both "blue"), so the rail keeps   */
+/*  its own map — fully-spelled classes so Tailwind can extract them.          */
+/* -------------------------------------------------------------------------- */
+
+const railGradients: Record<string, string> = {
+  adobe: 'from-red-500 to-orange-500',
+  manifesthq: 'from-indigo-500 to-purple-500',
+  iit: 'from-amber-500 to-rose-500',
+  udacity: 'from-cyan-500 to-teal-500',
+  ibm: 'from-blue-700 to-sky-400',
+}
+
+const railHexes: Record<string, string> = {
+  adobe: '#f97316',
+  manifesthq: '#8b5cf6',
+  iit: '#f43f5e',
+  udacity: '#14b8a6',
+  ibm: '#38bdf8',
+}
+
+/** Odometer digits paint their own slice of one continuous gradient. */
+const railGradientStops: Record<string, [string, string]> = {
+  adobe: ['#ef4444', '#f97316'],
+  manifesthq: ['#6366f1', '#a855f7'],
+  iit: ['#f59e0b', '#f43f5e'],
+  udacity: ['#06b6d4', '#14b8a6'],
+  ibm: ['#1d4ed8', '#38bdf8'],
+}
+
+const MONTHS = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+]
+
+/** "June 2021 - Present" → months elapsed. Returns 0 when unparseable. */
+const monthsBetween = (period: string) => {
+  const parse = (part: string) => {
+    const token = part.trim().toLowerCase()
+    if (token === 'present' || token === 'current') {
+      const now = new Date()
+      return now.getFullYear() * 12 + now.getMonth()
+    }
+    const match = /([a-z]+)\s+(\d{4})/.exec(token)
+    if (!match) return null
+    const month = MONTHS.indexOf(match[1])
+    if (month === -1) return null
+    return Number(match[2]) * 12 + month
+  }
+
+  const [rawStart, rawEnd] = period.split(/\s[-–]\s/)
+  if (!rawStart || !rawEnd) return 0
+  const start = parse(rawStart)
+  const end = parse(rawEnd)
+  if (start === null || end === null) return 0
+  return Math.max(0, end - start)
+}
+
+/** Compact duration label: "8 mos", "1 yr", "5 yrs". */
+const durationLabel = (period: string) => {
+  const months = monthsBetween(period)
+  if (months <= 0) return ''
+  if (months < 12) return `${months} mo${months === 1 ? '' : 's'}`
+  const years = Math.max(1, Math.round(months / 12))
+  return `${years} yr${years === 1 ? '' : 's'}`
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Accent tokens — fully-spelled class strings.                               */
@@ -101,6 +179,8 @@ const EASE_STATE = 'cubic-bezier(0.4, 0, 0.2, 1)'
 const STICKY_OFFSET = 128
 /** Focal line (fraction of viewport height) that picks the active card. */
 const FOCAL = 0.55
+/** Extra travel past the midpoint before the rail commits to the next entry. */
+const SWITCH_BAND = 0.1
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
@@ -222,18 +302,164 @@ const CountUpMetric = ({ raw, active, reduced }: CountUpMetricProps) => {
 /*  Sticky company rail (desktop)                                              */
 /* -------------------------------------------------------------------------- */
 
+/* -------------------------------------------------------------------------- */
+/*  Odometer year — digits roll individually with a short stagger              */
+/* -------------------------------------------------------------------------- */
+
+const ODO_DURATION = 620
+const ODO_STAGGER = 45
+/** Digit box width in em — also the step used to slice the year gradient. */
+const ODO_DIGIT_EM = 0.62
+
+const DigitRoll = ({
+  char,
+  delay,
+  paint,
+  reduced,
+}: {
+  char: string
+  delay: number
+  paint: CSSProperties
+  reduced: boolean
+}) => {
+  const [roll, setRoll] = useState({ cur: char, prev: null as string | null, key: 0 })
+
+  useEffect(() => {
+    setRoll((state) => (state.cur === char ? state : { cur: char, prev: state.cur, key: state.key + 1 }))
+  }, [char])
+
+  if (reduced) {
+    return (
+      <span className="inline-block tabular-nums" style={{ width: `${ODO_DIGIT_EM}em`, ...paint }}>
+        {char}
+      </span>
+    )
+  }
+
+  const motion: CSSProperties = {
+    animationDuration: `${ODO_DURATION}ms`,
+    animationDelay: `${delay}ms`,
+    animationTimingFunction: EASE_ENTRANCE,
+    animationFillMode: 'both',
+  }
+
+  return (
+    <span
+      className="relative inline-block overflow-hidden tabular-nums align-top"
+      style={{ width: `${ODO_DIGIT_EM}em`, height: '1em' }}
+    >
+      {roll.prev !== null && (
+        <span
+          key={`out-${roll.key}`}
+          className="absolute inset-0 animate-odo-out"
+          style={{ ...paint, ...motion }}
+          onAnimationEnd={() => setRoll((state) => (state.prev === null ? state : { ...state, prev: null }))}
+        >
+          {roll.prev}
+        </span>
+      )}
+      <span key={`in-${roll.key}`} className="absolute inset-0 animate-odo-in" style={{ ...paint, ...motion }}>
+        {roll.cur}
+      </span>
+    </span>
+  )
+}
+
+const YearOdometer = ({
+  year,
+  stops,
+  reduced,
+}: {
+  year: string
+  stops: [string, string]
+  reduced: boolean
+}) => (
+  <span aria-label={year}>
+    {year.split('').map((char, index) => (
+      <DigitRoll
+        key={index}
+        char={char}
+        delay={index * ODO_STAGGER}
+        reduced={reduced}
+        paint={{
+          backgroundImage: `linear-gradient(to right, ${stops[0]}, ${stops[1]})`,
+          backgroundSize: `${year.length * ODO_DIGIT_EM}em 100%`,
+          backgroundPosition: `-${index * ODO_DIGIT_EM}em 0`,
+          backgroundRepeat: 'no-repeat',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent',
+        }}
+      />
+    ))}
+  </span>
+)
+
 interface CompanyRailProps {
   items: ExperienceEntry[]
   activeIndex: number
+  direction: number
   progress: number
   reduced: boolean
   onSelect: (index: number) => void
 }
 
-const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: CompanyRailProps) => {
-  const duration = reduced ? 0 : 520
+/** Cross-fading stack: every entry shares one grid cell, only the active one
+ *  is visible. Keeps the rail sized to the tallest entry (no layout shift)
+ *  while letting the year above it roll continuously. */
+const SwapStack = ({
+  items,
+  activeIndex,
+  direction,
+  reduced,
+  className = '',
+  render,
+}: {
+  items: ExperienceEntry[]
+  activeIndex: number
+  direction: number
+  reduced: boolean
+  className?: string
+  render: (item: ExperienceEntry, index: number) => ReactNode
+}) => {
+  const exitMs = reduced ? 0 : 160
+  const enterMs = reduced ? 0 : 420
+  const enterDelay = reduced ? 0 : 90
+  const offset = direction >= 0 ? 14 : -14
+
+  return (
+    <div className={`grid ${className}`}>
+      {items.map((item, index) => {
+        const isActive = index === activeIndex
+        return (
+          <div
+            key={item.id}
+            aria-hidden={!isActive}
+            className="col-start-1 row-start-1"
+            style={{
+              opacity: isActive ? 1 : 0,
+              transform: isActive ? 'translateY(0) scale(1)' : `translateY(${offset}px) scale(0.985)`,
+              pointerEvents: isActive ? 'auto' : 'none',
+              transitionProperty: 'opacity, transform',
+              transitionDuration: `${isActive ? enterMs : exitMs}ms`,
+              transitionDelay: `${isActive ? enterDelay : 0}ms`,
+              transitionTimingFunction: isActive ? EASE_ENTRANCE : EASE_STATE,
+              willChange: 'opacity, transform',
+            }}
+          >
+            {render(item, index)}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelect }: CompanyRailProps) => {
   const railRef = useRef<HTMLDivElement>(null)
   const [top, setTop] = useState(STICKY_OFFSET)
+  const activeItem = items[activeIndex]
+  const bloomHex = railHexes[activeItem?.id ?? ''] ?? getAccent(activeItem?.accent ?? 'blue').hex
 
   /* Keep the rail vertically centred in the space below the sticky bars */
   useEffect(() => {
@@ -255,47 +481,54 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
 
   return (
     <div ref={railRef} className="sticky self-start" style={{ top }}>
-      {/* Cross-fading company panel. Panels share one grid cell so the rail
-          sizes itself to the tallest entry — no magic height, no layout shift. */}
-      <div className="grid">
-        {items.map((item, index) => {
-          const accent = getAccent(item.accent)
-          const isActive = index === activeIndex
+      {/* Staged panel swap. Panels share one grid cell so the rail sizes
+          itself to the tallest entry — no magic height, no layout shift.
+          The outgoing panel clears fast, the incoming one slides in with the
+          scroll direction, and an accent bloom washes through underneath. */}
+      <div className="relative isolate">
+        {!reduced && (
+          <span
+            key={`bloom-${activeIndex}`}
+            aria-hidden="true"
+            className="pointer-events-none absolute -z-10 -inset-x-6 -top-6 h-40 animate-ink-bloom"
+            style={{
+              background: `radial-gradient(38% 60% at 22% 40%, ${bloomHex}, transparent 70%)`,
+            }}
+          />
+        )}
 
-          return (
-            <div
-              key={item.id}
-              aria-hidden={!isActive}
-              className="col-start-1 row-start-1"
-              style={{
-                opacity: isActive ? 1 : 0,
-                transform: isActive ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.985)',
-                pointerEvents: isActive ? 'auto' : 'none',
-                transitionProperty: 'opacity, transform',
-                transitionDuration: `${duration}ms`,
-                transitionTimingFunction: EASE_STATE,
-                willChange: 'opacity, transform',
-              }}
-            >
-              <div className="flex items-center gap-3 mb-4">
+        <SwapStack
+          items={items}
+          activeIndex={activeIndex}
+          direction={direction}
+          reduced={reduced}
+          className="mb-4"
+          render={(item, index) => {
+            const accent = getAccent(item.accent)
+            const gradient = railGradients[item.id] ?? accent.gradient
+
+            return (
+              <div className="flex items-center gap-3">
                 {logoMap[item.company] ? (
-                  <img
-                    src={logoMap[item.company]}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-11 h-11 object-contain"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <span className="w-11 h-11 rounded-xl bg-white ring-1 ring-gray-200 dark:ring-white/15 shadow-sm flex items-center justify-center p-1.5">
+                    <img
+                      src={logoMap[item.company]}
+                      alt=""
+                      aria-hidden="true"
+                      className="max-w-full max-h-full object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
                 ) : (
                   <div
-                    className={`w-11 h-11 rounded-xl bg-gradient-to-r ${accent.gradient} flex items-center justify-center text-white shadow-sm`}
+                    className={`w-11 h-11 rounded-xl bg-gradient-to-r ${gradient} flex items-center justify-center text-white shadow-sm`}
                   >
                     {typeIcon(item.type, 'w-5 h-5')}
                   </div>
                 )}
 
-                {index === 0 && (
+                {index === 0 ? (
                   <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${accent.soft} ${accent.text}`}
                   >
@@ -309,25 +542,54 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
                     </span>
                     Current
                   </span>
+                ) : (
+                  (item.type === 'education' || item.remote) && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300">
+                      {item.type === 'education' ? 'Education' : 'Remote'}
+                    </span>
+                  )
                 )}
               </div>
+            )
+          }}
+        />
 
-              <div
-                className={`text-6xl font-black leading-none tracking-tight bg-gradient-to-r ${accent.gradient} bg-clip-text text-transparent mb-3`}
-              >
-                {item.year}
-              </div>
+        {/* One year element for the whole rail so the digits roll between
+            entries instead of cross-fading with the rest of the panel. */}
+        <div className="text-6xl font-black leading-none tracking-tight mb-3">
+          <YearOdometer
+            year={activeItem?.year ?? ''}
+            stops={railGradientStops[activeItem?.id ?? ''] ?? ['#2563eb', '#4f46e5']}
+            reduced={reduced}
+          />
+        </div>
 
-              <div className="text-lg font-bold text-gray-900 dark:text-white leading-snug mb-1">
-                {item.company}
-              </div>
-              <div className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug">
-                {item.title}
-              </div>
+        <SwapStack
+          items={items}
+          activeIndex={activeIndex}
+          direction={direction}
+          reduced={reduced}
+          render={(item) => {
+            const meta = [item.remote ? 'Remote' : item.location, durationLabel(item.period)].filter(Boolean)
 
-            </div>
-          )
-        })}
+            return (
+              <>
+                <div className="text-lg font-bold text-gray-900 dark:text-white leading-snug mb-1">
+                  {item.company}
+                </div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug mb-2">
+                  {item.title}
+                </div>
+                {meta.length > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+                    <span>{meta.join(' · ')}</span>
+                  </div>
+                )}
+              </>
+            )
+          }}
+        />
       </div>
 
       <RoadNav
@@ -997,8 +1259,20 @@ const Timeline = () => {
   const cardRefs = useRef<(HTMLLIElement | null)[]>([])
 
   const [activeIndex, setActiveIndex] = useState(0)
+  const [direction, setDirection] = useState(1)
   const [revealed, setRevealed] = useState<boolean[]>(() => timelineData.map(() => false))
   const [progress, setProgress] = useState(0)
+  /** Index the user jumped to; holds the panel steady while smooth-scrolling. */
+  const jumpTargetRef = useRef<number | null>(null)
+
+  /** Single entry point so the rail always knows which way it is moving. */
+  const selectIndex = useCallback((next: number) => {
+    setActiveIndex((prev) => {
+      if (prev === next) return prev
+      setDirection(next > prev ? 1 : -1)
+      return next
+    })
+  }, [])
 
   const isMobile = useIsMobile()
   const reduced = useReducedMotion()
@@ -1053,14 +1327,14 @@ const Timeline = () => {
         const visible = entries.filter((entry) => entry.isIntersecting)
         if (visible.length === 0) return
         const index = cardRefs.current.indexOf(visible[0].target as HTMLLIElement)
-        if (index !== -1) setActiveIndex(index)
+        if (index !== -1) selectIndex(index)
       },
       { rootMargin: `-${Math.round(FOCAL * 100)}% 0px -${Math.round((1 - FOCAL) * 100) - 1}% 0px`, threshold: 0 }
     )
 
     cardRefs.current.forEach((el) => el && observer.observe(el))
     return () => observer.disconnect()
-  }, [timelineData])
+  }, [timelineData, selectIndex])
 
   /* Interpolated rail progress (rAF-throttled, passive) */
   useEffect(() => {
@@ -1085,9 +1359,29 @@ const Timeline = () => {
         const i = centres.findIndex((y, k) => k < centres.length - 1 && focal >= y && focal < centres[k + 1])
         p = i + (focal - centres[i]) / (centres[i + 1] - centres[i])
       }
-      setProgress(Math.round(p * 1000) / 1000)
-      // Desktop: keep the highlighted stop in lock-step with the marker
-      setActiveIndex(Math.round(p))
+      setProgress((prev) => {
+        const next = Math.round(p * 1000) / 1000
+        // Skip sub-pixel churn — the marker moves <0.5px for these deltas.
+        return Math.abs(next - prev) < 0.004 && next !== 0 && next !== centres.length - 1 ? prev : next
+      })
+
+      // A tab jump holds the panel on its target until the scroll lands, so
+      // intermediate companies never flash past.
+      const jump = jumpTargetRef.current
+      if (jump !== null) {
+        if (Math.abs(p - jump) < 0.12) jumpTargetRef.current = null
+        return
+      }
+
+      // Desktop: keep the highlighted stop in lock-step with the marker, with
+      // a hysteresis band so a jitter around the midpoint cannot flip-flop.
+      setActiveIndex((prev) => {
+        const target = Math.round(p)
+        if (target === prev) return prev
+        if (Math.abs(p - prev) <= 0.5 + SWITCH_BAND) return prev
+        setDirection(target > prev ? 1 : -1)
+        return target
+      })
     }
 
     const onScroll = () => {
@@ -1107,13 +1401,14 @@ const Timeline = () => {
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      setActiveIndex(index)
+      jumpTargetRef.current = index
+      selectIndex(index)
       cardRefs.current[index]?.scrollIntoView({
         behavior: reduced ? 'auto' : 'smooth',
         block: 'center',
       })
     },
-    [reduced]
+    [reduced, selectIndex]
   )
 
   return (
@@ -1123,6 +1418,7 @@ const Timeline = () => {
           <CompanyRail
             items={timelineData}
             activeIndex={activeIndex}
+            direction={direction}
             progress={progress}
             reduced={reduced}
             onSelect={scrollToIndex}

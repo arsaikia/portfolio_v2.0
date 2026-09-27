@@ -12,7 +12,7 @@ const About = () => {
       >
         <div className="container-max section-padding">
           {/* About Me - Compact and Simple */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <h2 
               id="about-heading"
               className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6"
@@ -21,12 +21,12 @@ const About = () => {
             </h2>
             
             <div className="max-w-4xl mx-auto">
-              <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                I'm a developer passionate about crafting accessible, pixel-perfect user interfaces that blend thoughtful design with robust engineering.
+              <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+                Senior full-stack engineer at Adobe with 8+ years of experience building commerce systems that are fast, accessible and easy for other teams to build on. My work has lifted checkout conversion by 12% and added $1.5M in annual recurring revenue.
               </p>
-              
+
               <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl mx-auto">
-                With 8+ years of experience, I specialize in full-stack development and building scalable applications that serve millions of users while maintaining high performance standards.
+                Off the clock, you'll find me deep in a video game or playing guitar.
               </p>
             </div>
           </div>
@@ -35,9 +35,20 @@ const About = () => {
           <div className="max-w-5xl mx-auto">
             {/* Timeline */}
             <section className="mb-8" aria-labelledby="experience-heading">
-              <h3 id="experience-heading" className="sr-only">
-                Career Timeline
-              </h3>
+              {/* Sticks under the site header while the timeline scrolls;
+                  releases with the section. Doubles as the bio/career separator. */}
+              <div className="sticky top-16 z-30 -mx-4 px-4 mb-8 py-3 bg-gray-50/85 dark:bg-gray-900/85 backdrop-blur-md">
+                <div className="flex items-center gap-4">
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent to-gray-300 dark:to-gray-700" aria-hidden="true" />
+                  <h3
+                    id="experience-heading"
+                    className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400"
+                  >
+                    Experience
+                  </h3>
+                  <span className="h-px flex-1 bg-gradient-to-l from-transparent to-gray-300 dark:to-gray-700" aria-hidden="true" />
+                </div>
+              </div>
               <Timeline />
             </section>
           </div>

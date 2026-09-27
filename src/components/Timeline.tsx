@@ -85,6 +85,11 @@ const EASE_ENTRANCE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 /** Standard material-ish curve. Used for state changes / cross-fades. */
 const EASE_STATE = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
+/** Space taken by the fixed site header (64px) + sticky "Experience" bar. */
+const STICKY_OFFSET = 128
+/** Focal line (fraction of viewport height) that picks the active card. */
+const FOCAL = 0.55
+
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
@@ -215,9 +220,29 @@ interface CompanyRailProps {
 
 const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: CompanyRailProps) => {
   const duration = reduced ? 0 : 520
+  const railRef = useRef<HTMLDivElement>(null)
+  const [top, setTop] = useState(STICKY_OFFSET)
+
+  /* Keep the rail vertically centred in the space below the sticky bars */
+  useEffect(() => {
+    const el = railRef.current
+    if (!el) return
+    const update = () => {
+      const free = window.innerHeight - STICKY_OFFSET
+      setTop(STICKY_OFFSET + Math.max(0, (free - el.offsetHeight) / 2))
+    }
+    update()
+    window.addEventListener('resize', update)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null
+    ro?.observe(el)
+    return () => {
+      window.removeEventListener('resize', update)
+      ro?.disconnect()
+    }
+  }, [])
 
   return (
-    <div className="sticky top-28 self-start">
+    <div ref={railRef} className="sticky self-start" style={{ top }}>
       {/* Cross-fading company panel. Panels share one grid cell so the rail
           sizes itself to the tallest entry — no magic height, no layout shift. */}
       <div className="grid">
@@ -418,7 +443,7 @@ const ExperienceCard = ({
       }
 
   return (
-    <li ref={registerRef} data-timeline-item={item.id} style={revealStyle}>
+    <li ref={registerRef} data-timeline-item={item.id} className="scroll-mt-36" style={revealStyle}>
       <article
         aria-labelledby={headingId}
         className={`relative overflow-hidden rounded-2xl bg-white/90 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/60 dark:border-gray-700/60 shadow-sm hover:shadow-lg p-5 sm:p-6 ${
@@ -650,7 +675,7 @@ const Timeline = () => {
         const index = cardRefs.current.indexOf(visible[0].target as HTMLLIElement)
         if (index !== -1) setActiveIndex(index)
       },
-      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+      { rootMargin: `-${Math.round(FOCAL * 100)}% 0px -${Math.round((1 - FOCAL) * 100) - 1}% 0px`, threshold: 0 }
     )
 
     cardRefs.current.forEach((el) => el && observer.observe(el))
@@ -669,7 +694,7 @@ const Timeline = () => {
       if (!el) return
       const rect = el.getBoundingClientRect()
       if (rect.height === 0) return
-      const focal = window.innerHeight * 0.5
+      const focal = window.innerHeight * FOCAL
       setProgress(Math.max(0, Math.min(1, (focal - rect.top) / rect.height)))
     }
 
@@ -690,6 +715,7 @@ const Timeline = () => {
 
   const scrollToIndex = useCallback(
     (index: number) => {
+      setActiveIndex(index)
       cardRefs.current[index]?.scrollIntoView({
         behavior: reduced ? 'auto' : 'smooth',
         block: 'center',

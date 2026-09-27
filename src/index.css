@@ -159,7 +159,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 4rem;
+    scroll-padding-top: 5rem;
     /* Optimize for mobile performance */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;

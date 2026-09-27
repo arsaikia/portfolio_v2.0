@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Timeline Redesign — Mockups</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: Inter, system-ui, sans-serif; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors">
+
+<!-- Control bar -->
+<div class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-950/80 border-b border-gray-200 dark:border-gray-800">
+  <div class="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3 flex-wrap">
+    <span class="text-sm font-semibold mr-2">Mockups:</span>
+    <button data-tab="a" class="tab px-3 py-1.5 rounded-lg text-sm font-medium transition">A · Sticky rail</button>
+    <button data-tab="b" class="tab px-3 py-1.5 rounded-lg text-sm font-medium transition">B · Spine + count-ups</button>
+    <button data-tab="c" class="tab px-3 py-1.5 rounded-lg text-sm font-medium transition">C · Master–detail</button>
+    <div class="flex-1"></div>
+    <button id="theme" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">🌙 / ☀️</button>
+  </div>
+</div>
+
+<!-- ============ VARIANT A : STICKY COMPANY RAIL ============ -->
+<section data-panel="a" class="panel">
+  <div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="text-center mb-4">
+      <h2 class="text-3xl md:text-4xl font-bold">Experience</h2>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Variant A — left rail pins & cross-fades as you scroll. All cards in normal page flow.</p>
+    </div>
+
+    <div class="mt-12 md:grid md:grid-cols-[300px_1fr] md:gap-12">
+      <!-- Sticky rail -->
+      <div class="hidden md:block">
+        <div class="sticky top-28">
+          <div id="a-rail" class="relative h-[320px]">
+            <!-- panels injected -->
+          </div>
+          <!-- progress dots -->
+          <div class="mt-8 flex flex-col gap-3" id="a-dots"></div>
+        </div>
+      </div>
+
+      <!-- Cards in flow -->
+      <div class="space-y-6 md:space-y-10" id="a-cards"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VARIANT B : SPINE + COUNT-UPS ============ -->
+<section data-panel="b" class="panel hidden">
+  <div class="max-w-4xl mx-auto px-6 py-16">
+    <div class="text-center mb-4">
+      <h2 class="text-3xl md:text-4xl font-bold">Experience</h2>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Variant B — a spine that fills with scroll progress; metrics count up on entry.</p>
+    </div>
+
+    <div class="relative mt-14 pl-10 md:pl-16" id="b-wrap">
+      <!-- spine track -->
+      <div class="absolute left-[14px] md:left-[22px] top-2 bottom-2 w-[3px] rounded-full bg-gray-200 dark:bg-gray-800"></div>
+      <!-- spine fill -->
+      <div id="b-fill" class="absolute left-[14px] md:left-[22px] top-2 w-[3px] rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500" style="height:0"></div>
+      <div class="space-y-12" id="b-items"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VARIANT C : MASTER–DETAIL ============ -->
+<section data-panel="c" class="panel hidden">
+  <div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="text-center mb-4">
+      <h2 class="text-3xl md:text-4xl font-bold">Experience</h2>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Variant C — persistent list on the left, detail crossfades on hover / focus / click.</p>
+    </div>
+
+    <div class="mt-12 md:grid md:grid-cols-[280px_1fr] md:gap-10">
+      <div role="tablist" aria-label="Companies" class="flex md:flex-col gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0" id="c-list"></div>
+      <div class="mt-6 md:mt-0 min-h-[420px]" id="c-detail"></div>
+    </div>
+  </div>
+</section>
+
+<div class="h-32"></div>
+
+<script>
+const DATA = [
+  {
+    id:'adobe', title:'Senior Full Stack Engineer', company:'Adobe', period:'June 2021 — Present',
+    year:'2021', location:'San Francisco, CA', accent:'red', current:true,
+    logo:'https://www.adobe.com/favicon.ico',
+    mark:'A', markBg:'from-red-500 to-orange-500',
+    description:'Engineered core ecommerce solutions for Generative AI assets, modernized customer checkout flows, and led development of modular commerce systems.',
+    achievements:[
+      {metric:'1.5%', value:1.5, suffix:'%', description:'of total stock revenue from AI assets'},
+      {metric:'+18%', value:18, prefix:'+', suffix:'%', description:'Customer retention boost'},
+      {metric:'83%', value:83, suffix:'%', description:'Reduced integration effort'},
+      {metric:'$1.5M', value:1.5, prefix:'$', suffix:'M', description:'GNARR boost from Plans page'}
+    ],
+    technologies:['React','Node.js','TypeScript','GraphQL','Adobe Spectrum','Franklin','Python','Java']
+  },
+  {
+    id:'manifesthq', title:'Front End Developer', company:'ManifestHQ', period:'May 2020 — May 2021',
+    year:'2020', location:'Chicago, IL', accent:'blue',
+    mark:'M', markBg:'from-blue-600 to-indigo-600',
+    description:'Led development of responsive React.js web app for 401k retirement funds transfers, architected reusable UI library.',
+    achievements:[
+      {metric:'80%', value:80, suffix:'%', description:'Reduced transfer time'},
+      {metric:'80%', value:80, suffix:'%', description:'Test coverage for UI library'},
+      {metric:'100%', value:100, suffix:'%', description:'Mobile-first responsive design'}
+    ],
+    technologies:['React','TypeScript','Node.js','Styled Components','Storybook','AWS S3','Spring Boot']
+  },
+  {
+    id:'udacity', title:'Project Reviewer & Classroom Mentor', company:'Udacity', period:'Feb 2017 — July 2019',
+    year:'2017', location:'Bangalore, India', accent:'purple',
+    mark:'U', markBg:'from-purple-600 to-pink-600',
+    description:'Reviewed student projects for the Data Scientist Nanodegree and mentored batches of 30 students.',
+    achievements:[
+      {metric:'500+', value:500, suffix:'+', description:'Projects reviewed'},
+      {metric:'30', value:30, description:'Students per batch'},
+      {metric:'95%', value:95, suffix:'%', description:'Student satisfaction'}
+    ],
+    technologies:['Python','Data Science','Machine Learning','Mentoring','Curriculum']
+  },
+  {
+    id:'ibm', title:'Software Engineer', company:'IBM', period:'March 2016 — July 2019',
+    year:'2016', location:'Bangalore, India', accent:'blue',
+    mark:'I', markBg:'from-blue-800 to-blue-900',
+    description:'Championed Agile methodologies across the full SDLC, pioneered a web automation framework.',
+    achievements:[
+      {metric:'70%', value:70, suffix:'%', description:'Testing time reduction'},
+      {metric:'90%', value:90, suffix:'%', description:'Data validation time saved'},
+      {metric:'5+', value:5, suffix:'+', description:'Enterprise apps delivered'}
+    ],
+    technologies:['Python','Java','Node.js','Express','React','Microservices','Agile']
+  }
+];
+
+const ACCENT = {
+  red:   {text:'text-red-600 dark:text-red-400',   bg:'bg-red-500',   ring:'ring-red-500/30',   soft:'bg-red-50 dark:bg-red-500/10',   grad:'from-red-500 to-orange-500'},
+  blue:  {text:'text-blue-600 dark:text-blue-400', bg:'bg-blue-500',  ring:'ring-blue-500/30',  soft:'bg-blue-50 dark:bg-blue-500/10', grad:'from-blue-500 to-indigo-500'},
+  purple:{text:'text-purple-600 dark:text-purple-400', bg:'bg-purple-500', ring:'ring-purple-500/30', soft:'bg-purple-50 dark:bg-purple-500/10', grad:'from-purple-500 to-pink-500'}
+};
+
+const logoMark = (d, size='w-12 h-12', text='text-lg') => `
+  <div class="${size} rounded-xl bg-gradient-to-br ${d.markBg} flex items-center justify-center text-white font-extrabold ${text} shadow-lg shrink-0">${d.mark}</div>`;
+
+const chips = (techs, a) => techs.map(t =>
+  `<span class="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700">${t}</span>`).join('');
+
+/* ---------------- VARIANT A ---------------- */
+const railEl = document.getElementById('a-rail');
+const dotsEl = document.getElementById('a-dots');
+const cardsEl = document.getElementById('a-cards');
+
+railEl.innerHTML = DATA.map((d,i) => {
+  const a = ACCENT[d.accent];
+  return `<div data-rail="${i}" class="absolute inset-0 transition-all duration-500 ${i===0?'opacity-100 translate-y-0':'opacity-0 translate-y-4 pointer-events-none'}">
+    ${logoMark(d,'w-16 h-16','text-2xl')}
+    <div class="mt-5 text-[64px] leading-none font-extrabold tracking-tight bg-gradient-to-br ${a.grad} bg-clip-text text-transparent">${d.year}</div>
+    <h3 class="mt-3 text-xl font-bold">${d.company}</h3>
+    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">${d.title}</p>
+    <p class="mt-3 text-xs font-medium text-gray-500 dark:text-gray-500">${d.period}</p>
+    <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">${d.location}</p>
+    ${d.current ? `<span class="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${a.soft} ${a.text}"><span class="w-1.5 h-1.5 rounded-full ${a.bg} animate-pulse"></span>Current</span>`:''}
+  </div>`;
+}).join('');
+
+dotsEl.innerHTML = DATA.map((d,i)=>`
+  <button data-godot="${i}" class="group flex items-center gap-3 text-left">
+    <span data-dotbar="${i}" class="h-[2px] transition-all duration-300 ${i===0?'w-8 bg-blue-500':'w-4 bg-gray-300 dark:bg-gray-700'}"></span>
+    <span data-dotlabel="${i}" class="text-xs font-medium transition-colors ${i===0?'text-gray-900 dark:text-white':'text-gray-400 dark:text-gray-600'}">${d.company}</span>
+  </button>`).join('');
+
+cardsEl.innerHTML = DATA.map((d,i)=>{
+  const a = ACCENT[d.accent];
+  return `<article data-acard="${i}" class="opacity-0 translate-y-6 transition-all duration-700 rounded-2xl border border-gray-200/70 dark:border-gray-800 bg-white/80 dark:bg-gray-900/60 backdrop-blur p-6 md:p-7 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-xl hover:shadow-gray-900/5">
+    <div class="flex items-start gap-4 md:hidden mb-4">
+      ${logoMark(d)}
+      <div>
+        <h3 class="font-bold text-lg leading-tight">${d.title}</h3>
+        <p class="text-sm ${a.text} font-semibold">@${d.company}</p>
+        <p class="text-xs text-gray-500 mt-1">${d.period} · ${d.location}</p>
+      </div>
+    </div>
+    <div class="hidden md:flex items-baseline justify-between gap-4 mb-1">
+      <h3 class="font-bold text-xl">${d.title}</h3>
+      <span class="text-xs font-semibold ${a.text} shrink-0">${d.year}</span>
+    </div>
+    <p class="text-gray-600 dark:text-gray-300 leading-relaxed text-sm md:text-base">${d.description}</p>
+    <div class="mt-5 grid grid-cols-2 gap-3">
+      ${d.achievements.map(ac=>`
+        <div class="rounded-xl border border-gray-200/70 dark:border-gray-800 ${a.soft} p-3">
+          <div class="text-lg font-extrabold ${a.text}">${ac.metric}</div>
+          <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug mt-0.5">${ac.description}</div>
+        </div>`).join('')}
+    </div>
+    <div class="mt-5 flex flex-wrap gap-1.5">${chips(d.technologies,a)}</div>
+  </article>`;
+}).join('');
+
+const setRail = (idx) => {
+  document.querySelectorAll('[data-rail]').forEach(el=>{
+    const on = +el.dataset.rail === idx;
+    el.className = `absolute inset-0 transition-all duration-500 ${on?'opacity-100 translate-y-0':'opacity-0 translate-y-4 pointer-events-none'}`;
+  });
+  document.querySelectorAll('[data-dotbar]').forEach(el=>{
+    const on = +el.dataset.dotbar === idx;
+    el.className = `h-[2px] transition-all duration-300 ${on?'w-8 bg-blue-500':'w-4 bg-gray-300 dark:bg-gray-700'}`;
+  });
+  document.querySelectorAll('[data-dotlabel]').forEach(el=>{
+    const on = +el.dataset.dotlabel === idx;
+    el.className = `text-xs font-medium transition-colors ${on?'text-gray-900 dark:text-white':'text-gray-400 dark:text-gray-600'}`;
+  });
+};
+document.querySelectorAll('[data-godot]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelector(`[data-acard="${b.dataset.godot}"]`).scrollIntoView({behavior:'smooth',block:'center'});
+}));
+
+new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){ e.target.classList.remove('opacity-0','translate-y-6'); }
+}),{threshold:0.15}).observe , document.querySelectorAll('[data-acard]').forEach(el=>{
+  new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.remove('opacity-0','translate-y-6'); }),{threshold:0.15}).observe(el);
+});
+document.querySelectorAll('[data-acard]').forEach(el=>{
+  new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) setRail(+el.dataset.acard); }),{rootMargin:'-45% 0px -45% 0px'}).observe(el);
+});
+
+/* ---------------- VARIANT B ---------------- */
+const bItems = document.getElementById('b-items');
+bItems.innerHTML = DATA.map((d,i)=>{
+  const a = ACCENT[d.accent];
+  return `<article data-bcard="${i}" class="relative opacity-0 translate-y-8 transition-all duration-700">
+    <span class="absolute -left-10 md:-left-16 top-1 w-7 h-7 md:w-11 md:h-11 rounded-full bg-white dark:bg-gray-950 border-[3px] border-gray-200 dark:border-gray-800 flex items-center justify-center" data-bdot="${i}">
+      <span class="w-2.5 h-2.5 md:w-4 md:h-4 rounded-full bg-gradient-to-br ${a.grad}"></span>
+    </span>
+    <div class="rounded-2xl border border-gray-200/70 dark:border-gray-800 bg-white/80 dark:bg-gray-900/60 backdrop-blur p-6 hover:shadow-xl hover:shadow-gray-900/5 transition-shadow">
+      <div class="flex items-start gap-4">
+        ${logoMark(d)}
+        <div class="min-w-0 flex-1">
+          <div class="flex items-baseline gap-2 flex-wrap">
+            <h3 class="font-bold text-lg">${d.title}</h3>
+            <span class="${a.text} font-semibold text-sm">@${d.company}</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${d.period} · ${d.location}</p>
+        </div>
+        <span class="hidden sm:block text-2xl font-extrabold text-gray-200 dark:text-gray-800">${d.year}</span>
+      </div>
+      <p class="mt-4 text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">${d.description}</p>
+      <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        ${d.achievements.map((ac,j)=>`
+          <div class="rounded-xl ${a.soft} border border-gray-200/60 dark:border-gray-800 p-3 text-center">
+            <div class="text-xl font-extrabold ${a.text}" data-count="${i}-${j}"
+                 data-prefix="${ac.prefix||''}" data-suffix="${ac.suffix||''}" data-value="${ac.value}" data-decimals="${String(ac.value).includes('.')?1:0}">${ac.prefix||''}0${ac.suffix||''}</div>
+            <div class="text-[11px] text-gray-600 dark:text-gray-400 leading-snug mt-1">${ac.description}</div>
+          </div>`).join('')}
+      </div>
+      <div class="mt-5 flex flex-wrap gap-1.5">${chips(d.technologies,a)}</div>
+    </div>
+  </article>`;
+}).join('');
+
+const countUp = (el) => {
+  if (el.dataset.done) return; el.dataset.done = '1';
+  const target = parseFloat(el.dataset.value), dec = +el.dataset.decimals;
+  const pre = el.dataset.prefix, suf = el.dataset.suffix;
+  const dur = 1100, start = performance.now();
+  const step = (t) => {
+    const p = Math.min((t-start)/dur, 1);
+    const eased = 1 - Math.pow(1-p, 3);
+    el.textContent = pre + (target*eased).toFixed(dec) + suf;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+};
+
+document.querySelectorAll('[data-bcard]').forEach(el=>{
+  new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.remove('opacity-0','translate-y-8');
+      e.target.querySelectorAll('[data-count]').forEach(countUp);
+    }
+  }),{threshold:0.2}).observe(el);
+});
+
+const bWrap = document.getElementById('b-wrap'), bFill = document.getElementById('b-fill');
+const updateSpine = () => {
+  const r = bWrap.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const total = r.height;
+  const scrolled = Math.min(Math.max(vh*0.6 - r.top, 0), total);
+  bFill.style.height = scrolled + 'px';
+};
+window.addEventListener('scroll', updateSpine, {passive:true});
+window.addEventListener('resize', updateSpine);
+
+/* ---------------- VARIANT C ---------------- */
+const cList = document.getElementById('c-list'), cDetail = document.getElementById('c-detail');
+cList.innerHTML = DATA.map((d,i)=>{
+  const a = ACCENT[d.accent];
+  return `<button role="tab" data-ctab="${i}" aria-selected="${i===0}"
+    class="shrink-0 md:w-full text-left rounded-xl border px-4 py-3 transition-all duration-300 flex items-center gap-3
+    ${i===0 ? 'border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 shadow-md' : 'border-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50'}">
+    ${logoMark(d,'w-9 h-9','text-sm')}
+    <span class="min-w-0">
+      <span class="block font-semibold text-sm truncate">${d.company}</span>
+      <span class="block text-xs text-gray-500 dark:text-gray-400">${d.year}</span>
+    </span>
+  </button>`;
+}).join('');
+
+const renderDetail = (i) => {
+  const d = DATA[i], a = ACCENT[d.accent];
+  cDetail.innerHTML = `<div class="rounded-2xl border border-gray-200/70 dark:border-gray-800 bg-white/80 dark:bg-gray-900/60 backdrop-blur p-7 opacity-0 translate-y-3 transition-all duration-300">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h3 class="text-2xl font-bold">${d.title}</h3>
+        <p class="${a.text} font-semibold">@${d.company}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${d.period} · ${d.location}</p>
+      </div>
+      <span class="text-4xl font-extrabold bg-gradient-to-br ${a.grad} bg-clip-text text-transparent">${d.year}</span>
+    </div>
+    <p class="mt-5 text-gray-600 dark:text-gray-300 leading-relaxed">${d.description}</p>
+    <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      ${d.achievements.map(ac=>`<div class="rounded-xl ${a.soft} border border-gray-200/60 dark:border-gray-800 p-3">
+        <div class="text-xl font-extrabold ${a.text}">${ac.metric}</div>
+        <div class="text-[11px] text-gray-600 dark:text-gray-400 mt-1 leading-snug">${ac.description}</div></div>`).join('')}
+    </div>
+    <div class="mt-6 flex flex-wrap gap-1.5">${chips(d.technologies,a)}</div>
+  </div>`;
+  requestAnimationFrame(()=>{ const el = cDetail.firstElementChild; el.classList.remove('opacity-0','translate-y-3'); });
+};
+renderDetail(0);
+document.querySelectorAll('[data-ctab]').forEach(b=>{
+  const act = () => {
+    const i = +b.dataset.ctab;
+    document.querySelectorAll('[data-ctab]').forEach(x=>{
+      const on = x===b;
+      x.setAttribute('aria-selected', on);
+      x.className = `shrink-0 md:w-full text-left rounded-xl border px-4 py-3 transition-all duration-300 flex items-center gap-3 ${on?'border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 shadow-md':'border-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50'}`;
+    });
+    renderDetail(i);
+  };
+  b.addEventListener('click', act);
+  b.addEventListener('mouseenter', act);
+  b.addEventListener('focus', act);
+});
+
+/* ---------------- tabs + theme ---------------- */
+const paintTabs = (active) => {
+  document.querySelectorAll('.tab').forEach(t=>{
+    const on = t.dataset.tab===active;
+    t.className = `tab px-3 py-1.5 rounded-lg text-sm font-medium transition ${on?'bg-blue-600 text-white shadow':'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('hidden', p.dataset.panel!==active));
+  window.scrollTo({top:0});
+  updateSpine();
+};
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>paintTabs(t.dataset.tab)));
+paintTabs('a');
+
+document.getElementById('theme').addEventListener('click',()=>document.documentElement.classList.toggle('dark'));
+updateSpine();
+</script>
+</body>
+</html>

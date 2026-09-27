@@ -50,7 +50,7 @@ const Projects = () => {
   }, [isMobile])
 
   return (
-    <section id="projects" className="py-20 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm">
+    <section id="projects" className="py-20 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
       <div className="container-max section-padding">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">

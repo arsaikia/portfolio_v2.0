@@ -149,64 +149,22 @@ const durationLabel = (period: string) => {
   return `${years} yr${years === 1 ? '' : 's'}`
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Accent tokens — fully-spelled class strings.                               */
-/*  NOTE: the previous implementation built `text-red-${opacity}` at runtime,  */
-/*  which Tailwind cannot statically extract, so those classes never existed.  */
-/* -------------------------------------------------------------------------- */
-
-const accentStyles = {
-  red: {
-    hex: '#ef4444',
-    text: 'text-red-600 dark:text-red-400',
-    dot: 'bg-red-500',
-    soft: 'bg-red-50 dark:bg-red-950/40',
-    gradient: 'from-red-500 to-orange-500',
-  },
-  blue: {
-    hex: '#3b82f6',
-    text: 'text-blue-600 dark:text-blue-400',
-    dot: 'bg-blue-500',
-    soft: 'bg-blue-50 dark:bg-blue-950/40',
-    gradient: 'from-blue-600 to-indigo-600',
-  },
-  purple: {
-    hex: '#a855f7',
-    text: 'text-purple-600 dark:text-purple-400',
-    dot: 'bg-purple-500',
-    soft: 'bg-purple-50 dark:bg-purple-950/40',
-    gradient: 'from-purple-600 to-pink-600',
-  },
-  green: {
-    hex: '#22c55e',
-    text: 'text-green-600 dark:text-green-400',
-    dot: 'bg-green-500',
-    soft: 'bg-green-50 dark:bg-green-950/40',
-    gradient: 'from-green-500 to-emerald-500',
-  },
-  amber: {
-    hex: '#f59e0b',
-    text: 'text-amber-600 dark:text-amber-400',
-    dot: 'bg-amber-500',
-    soft: 'bg-amber-50 dark:bg-amber-950/40',
-    gradient: 'from-amber-500 to-orange-500',
-  },
-} as const
-
-type AccentKey = keyof typeof accentStyles
-const getAccent = (accent: string) => accentStyles[accent as AccentKey] ?? accentStyles.blue
-
 /**
- * Per-company palette. Accents in the data are shared (ManifestHQ and IBM are
- * both "blue"), so entries get their own identity here and every surface —
- * rail year, road trail, card top-bar, card body text — reads from it.
+ * Per-company palette: `railAccents` above is the single source of truth, so
+ * every surface — rail year, road trail, card top-bar, card body text — reads
+ * from it. The fallback only fires for an id with no entry there.
  */
-const railAccent = (item: Pick<ExperienceEntry, 'id' | 'accent'>): RailAccent => {
-  const rail = railAccents[item.id]
-  if (rail) return rail
-  const base = getAccent(item.accent)
-  return { ...base, stops: [base.hex, base.hex] }
+const FALLBACK_ACCENT: RailAccent = {
+  gradient: 'from-blue-600 to-indigo-600',
+  stops: ['#3b82f6', '#6366f1'],
+  hex: '#3b82f6',
+  text: 'text-blue-600 dark:text-blue-400',
+  dot: 'bg-blue-500',
+  soft: 'bg-blue-50 dark:bg-blue-950/40',
 }
+
+const railAccent = (item: Pick<ExperienceEntry, 'id'>): RailAccent =>
+  railAccents[item.id] ?? FALLBACK_ACCENT
 
 /* -------------------------------------------------------------------------- */
 /*  Motion primitives                                                          */
@@ -1149,13 +1107,13 @@ const ExperienceCard = ({
           </div>
         )}
 
-        <h3
+        <h4
           id={headingId}
           className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 leading-snug"
         >
           {item.title}{' '}
           <span className={`font-semibold ${accent.text}`}>@{item.company}</span>
-        </h3>
+        </h4>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
           <span className="flex items-center gap-1.5">
@@ -1164,7 +1122,7 @@ const ExperienceCard = ({
           </span>
           <span className="flex items-center gap-1.5">
             <MapPin className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-            <span>{item.location}</span>
+            <span>{item.remote ? `${item.location} · Remote` : item.location}</span>
           </span>
         </div>
 
@@ -1211,14 +1169,19 @@ const ExperienceCard = ({
         </p>
 
         {/* Key impact */}
-        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
-          Key Impact
-        </h4>
+        <h5 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
+          {item.type === 'education' ? 'At a Glance' : 'Key Impact'}
+        </h5>
         <ul className="grid grid-cols-2 gap-2 mb-5">
-          {item.achievements.map((achievement) => (
+          {item.achievements.map((achievement, i) => (
             <li
               key={achievement.description}
               className={`rounded-lg bg-gray-50/80 dark:bg-gray-800/40 border border-gray-200/60 dark:border-gray-700/60 p-2.5 ${
+                /* Odd counts would leave a half-width orphan: let the last tile span the row. */
+                item.achievements.length % 2 === 1 && i === item.achievements.length - 1
+                  ? 'col-span-2'
+                  : ''
+              } ${
                 reduced ? '' : 'transition-colors duration-300'
               } hover:border-gray-300/80 dark:hover:border-gray-600/80`}
             >
@@ -1292,9 +1255,9 @@ const ExperienceCard = ({
         {/* Technologies */}
         {item.technologies.length > 0 && (
           <>
-            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mt-5 mb-2">
+            <h5 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mt-5 mb-2">
               Technologies
-            </h4>
+            </h5>
             <ul className="flex flex-wrap gap-1.5">
               {item.technologies.map((tech) => (
                 <li

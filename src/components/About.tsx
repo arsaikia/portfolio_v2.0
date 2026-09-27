@@ -7,7 +7,7 @@ const About = () => {
       {/* About Me Section - Compact and Focused */}
       <section 
         id="about" 
-        className="py-16 bg-gray-50/80 dark:bg-gray-900/70 backdrop-blur-sm"
+        className="py-20 bg-gray-50/80 dark:bg-gray-900/70 backdrop-blur-sm"
         aria-labelledby="about-heading"
       >
         <div className="container-max section-padding">

@@ -49,7 +49,7 @@ const Contact = () => {
     <section 
       ref={sectionRef}
       id="contact" 
-      className="py-12 sm:py-16 bg-gray-50/80 dark:bg-gray-800/70 backdrop-blur-sm"
+      className="py-16 sm:py-20 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
     >
       <div className="container-max section-padding">
         {/* Animated Header */}

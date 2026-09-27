@@ -21,8 +21,6 @@ export interface ExperienceEntry {
   responsibilities: ResponsibilityData[]
   technologies: string[]
   type: 'work' | 'education'
-  color: string
-  accent: string
   /** Role changes within the same company, oldest first. */
   progression?: { title: string; year: string }[]
   /** Remote role: the rail shows "Remote" instead of the city. */
@@ -53,8 +51,6 @@ export const experience: ExperienceEntry[] = [
     ],
     technologies: ['React', 'Node.js', 'TypeScript', 'GraphQL', 'Adobe Spectrum', 'Franklin Framework', 'Python', 'Java', 'Express', 'Microservices'],
     type: 'work',
-    color: 'from-red-500 to-orange-500',
-    accent: 'red',
     progression: [
       { title: 'Joined as Full Stack Engineer', year: '2021' },
       { title: 'Promoted', year: '2022' },
@@ -81,9 +77,7 @@ export const experience: ExperienceEntry[] = [
       { text: 'Translated business & user requirements into technical specifications through collaboration with CTO and UX teams', iconName: 'Users' }
     ],
     technologies: ['React', 'TypeScript', 'Node.js', 'Styled Components', 'Storybook', 'AWS S3', 'Spring Boot', 'REST APIs', 'Bitbucket'],
-    type: 'work',
-    color: 'from-blue-600 to-indigo-600',
-    accent: 'blue'
+    type: 'work'
   },
   {
     id: 'iit',
@@ -103,9 +97,7 @@ export const experience: ExperienceEntry[] = [
       { text: 'Started as a Front End Developer at ManifestHQ while completing the degree', iconName: 'Code' }
     ],
     technologies: [],
-    type: 'education',
-    color: 'from-amber-500 to-orange-500',
-    accent: 'amber'
+    type: 'education'
   },
   {
     id: 'udacity',
@@ -128,9 +120,7 @@ export const experience: ExperienceEntry[] = [
       { text: 'Contributed to curriculum development and assessment strategies for Data Science education', iconName: 'Code' }
     ],
     technologies: ['Python', 'Data Science', 'Machine Learning', 'Mentoring', 'Curriculum Development', 'Assessment'],
-    type: 'education',
-    color: 'from-purple-600 to-pink-600',
-    accent: 'purple'
+    type: 'work'
   },
   {
     id: 'ibm',
@@ -152,8 +142,6 @@ export const experience: ExperienceEntry[] = [
       { text: 'Architected and implemented comprehensive Unit, Regression, and Integration test scripts; engineered responsive UI features in React', iconName: 'Shield' }
     ],
     technologies: ['Python', 'Java', 'Node.js', 'Express', 'React', 'Microservices', 'Agile', 'HTML', 'CSS', 'Testing'],
-    type: 'work',
-    color: 'from-blue-800 to-blue-900',
-    accent: 'blue'
+    type: 'work'
   }
 ]

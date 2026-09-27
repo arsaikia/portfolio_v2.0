@@ -40,7 +40,7 @@ const Skills = () => {
     <section 
       ref={sectionRef}
       id="skills" 
-      className="py-20 bg-gray-50/70 dark:bg-gray-800/70 backdrop-blur-sm"
+      className="py-20 bg-gray-50/80 dark:bg-gray-900/70 backdrop-blur-sm"
     >
       <div className="container-max section-padding">
         {/* Animated Header */}

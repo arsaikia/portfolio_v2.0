@@ -76,6 +76,13 @@ const accentStyles = {
     soft: 'bg-green-50 dark:bg-green-950/40',
     gradient: 'from-green-500 to-emerald-500',
   },
+  amber: {
+    hex: '#f59e0b',
+    text: 'text-amber-600 dark:text-amber-400',
+    dot: 'bg-amber-500',
+    soft: 'bg-amber-50 dark:bg-amber-950/40',
+    gradient: 'from-amber-500 to-orange-500',
+  },
 } as const
 
 type AccentKey = keyof typeof accentStyles
@@ -415,7 +422,6 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
   const total = useRef(0)
   const current = useRef(progress)
   const target = useRef(progress)
-  const gradientId = useId()
   const glowId = useId()
   const tailFadeId = useId()
 
@@ -483,15 +489,6 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2={height} gradientUnits="userSpaceOnUse">
-            {items.map((item, i) => (
-              <stop
-                key={item.id}
-                offset={items.length > 1 ? i / (items.length - 1) : 0}
-                stopColor={getAccent(item.accent).hex}
-              />
-            ))}
-          </linearGradient>
           <linearGradient
             id={tailFadeId}
             x1="0"
@@ -509,14 +506,14 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         </defs>
 
         {/* Road: faint track with a dotted centre line */}
-        <path d={d} fill="none" strokeWidth={6} strokeLinecap="round" className="stroke-gray-200/70 dark:stroke-gray-700/50" />
+        <path d={d} fill="none" strokeWidth={4} strokeLinecap="round" className="stroke-gray-200/50 dark:stroke-gray-700/40" />
         <path
           d={d}
           fill="none"
           strokeWidth={1}
-          strokeDasharray="1 5"
+          strokeDasharray="1 6"
           strokeLinecap="round"
-          className="stroke-gray-400/60 dark:stroke-gray-500/50"
+          className="stroke-gray-400/35 dark:stroke-gray-500/35"
         />
 
         {/* Faded dotted tail: earlier history not shown */}
@@ -527,6 +524,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           strokeWidth={2}
           strokeDasharray="0.5 5"
           strokeLinecap="round"
+          opacity={0.7}
           className="text-gray-400 dark:text-gray-500"
         />
 
@@ -535,9 +533,10 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           ref={trailRef}
           d={d}
           fill="none"
-          stroke={`url(#${gradientId})`}
-          strokeOpacity={0.45}
-          strokeWidth={2.5}
+          stroke={activeHex}
+          strokeOpacity={0.3}
+          strokeWidth={2}
+          style={{ transition: reduced ? 'none' : `stroke 420ms ${EASE_STATE}` }}
           strokeLinecap="round"
           strokeDasharray="10000"
           strokeDashoffset="10000"

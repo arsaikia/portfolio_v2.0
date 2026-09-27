@@ -102,8 +102,8 @@ export const experience: ExperienceEntry[] = [
     ],
     technologies: [],
     type: 'education',
-    color: 'from-green-500 to-emerald-500',
-    accent: 'green'
+    color: 'from-amber-500 to-orange-500',
+    accent: 'amber'
   },
   {
     id: 'udacity',

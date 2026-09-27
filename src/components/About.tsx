@@ -32,30 +32,19 @@ const About = () => {
           </div>
 
           {/* Main Content - Single Column for Better Focus */}
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             {/* Timeline */}
-            <div className="mb-8">
-              <div className="sr-only">
-                <p>Navigate through my career timeline using the year buttons on the right, or scroll through the timeline content.</p>
-              </div>
-              <div 
-                role="region"
-                aria-label="Career Timeline"
-                tabIndex={0}
-              >
-                <Timeline />
-              </div>
-            </div>
-
-
-
+            <section className="mb-8" aria-labelledby="experience-heading">
+              <h3 id="experience-heading" className="sr-only">
+                Career Timeline
+              </h3>
+              <Timeline />
+            </section>
           </div>
         </div>
       </section>
-
-
     </>
   )
 }
 
-export default About 
+export default About

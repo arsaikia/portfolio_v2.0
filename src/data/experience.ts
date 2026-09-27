@@ -35,7 +35,7 @@ export const experience: ExperienceEntry[] = [
     period: 'June 2021 - Present',
     year: '2021',
     location: 'San Francisco, CA',
-    description: 'Engineered core ecommerce solutions for Generative AI assets, modernized customer checkout flows, and led development of modular commerce systems.',
+    description: 'I work on the commerce platform behind Adobe Stock: the licensing, checkout, and plans surfaces that sell every asset in the library. When generative AI arrived, I designed the content credentials and indemnification layer that made those assets safe to license.',
     achievements: [
       { metric: '1.5%', description: 'of total stock revenue from AI assets', iconName: 'DollarSign' },
       { metric: '+18%', description: 'Customer retention boost', iconName: 'Users' },
@@ -43,13 +43,14 @@ export const experience: ExperienceEntry[] = [
       { metric: '$1.5M', description: 'GNARR boost from Plans page', iconName: 'DollarSign' }
     ],
     responsibilities: [
-      { text: 'Engineered core ecommerce solutions for Generative AI assets, enabling merchandising and licensing which now accounts for 1.5% of total stock revenue', iconName: 'Code' },
-      { text: 'Updated Checkout API for real-time content ID fetching via centralized licensing module and GraphQL, ensuring seamless integration across all Stock 2.0 surfaces', iconName: 'Zap' },
-      { text: 'Spearheaded comprehensive modernization and redesign of customer checkout flow (frontend & backend), integrating new customer segments and diverse payment providers', iconName: 'Globe' },
-      { text: "Streamlined Adobe Stock's checkout integration across web & desktop apps by developing modular, self-contained commerce component system", iconName: 'Target' },
-      { text: "Led modernization of Adobe Stock's Plans page to dynamically rendered, accessible platform via Franklin Headless Framework and Adobe Spectrum", iconName: 'Shield' }
+      { text: 'Designed the CAI content-credentials and indemnification layer for generative assets, the piece that let Adobe stand behind AI-generated work commercially. Licensing went from nothing to 1.5% of total Stock revenue', iconName: 'Code' },
+      { text: 'Rebuilt the Checkout API around a single licensing module and a GraphQL contract. Every Stock 2.0 surface now reads content IDs from one place instead of each team wiring up its own', iconName: 'Zap' },
+      { text: 'Set technical direction across Stock, Commerce, and platform teams. I wrote the design docs and API contracts other orgs build against, so nobody has to fork their own version of commerce', iconName: 'Users' },
+      { text: 'Led the design and delivery of the new checkout flow end to end, front to back, opening it up to new customer segments and several payment providers', iconName: 'Globe' },
+      { text: 'Broke checkout into self-contained commerce components that web and desktop both drop in. Teams integrating it spend 83% less effort than they used to', iconName: 'Target' },
+      { text: "Rebuilt Adobe Stock's Plans page as a dynamically rendered, accessible experience on Franklin and Adobe Spectrum, worth $1.5M in GNARR", iconName: 'Shield' }
     ],
-    technologies: ['React', 'Node.js', 'TypeScript', 'GraphQL', 'Adobe Spectrum', 'Franklin Framework', 'Python', 'Java', 'Express', 'Microservices'],
+    technologies: ['TypeScript', 'React', 'Node.js', 'GraphQL', 'Microservices', 'Java', 'Python', 'Express', 'Adobe Spectrum', 'Franklin Framework'],
     type: 'work',
     progression: [
       { title: 'Joined as Full Stack Engineer', year: '2021' },
@@ -64,19 +65,19 @@ export const experience: ExperienceEntry[] = [
     period: 'May 2020 - May 2021',
     year: '2020',
     location: 'Chicago, IL',
-    description: 'Led development of responsive React.js web app for 401k retirement funds transfers, architected reusable UI library.',
+    description: 'I built the web app that moves people\'s 401k savings between providers, and the component library the rest of the product was assembled from.',
     achievements: [
       { metric: '80%', description: 'Reduced transfer time', iconName: 'TrendingUp' },
       { metric: '80%', description: 'Test coverage for UI library', iconName: 'Target' },
       { metric: '100%', description: 'Mobile-first responsive design', iconName: 'Globe' }
     ],
     responsibilities: [
-      { text: 'Led development of responsive, mobile-first React.js web app (TypeScript, Node.js, Styled Components) for 401k retirement funds transfers', iconName: 'Code' },
-      { text: 'Architected reusable UI library (npm package, Storybook) with comprehensive test coverage, ensuring consistency and maintainability', iconName: 'Target' },
-      { text: 'Established and managed continuous deployment pipelines from Bitbucket to AWS S3, integrating React frontend with Spring Boot backend', iconName: 'Zap' },
-      { text: 'Translated business & user requirements into technical specifications through collaboration with CTO and UX teams', iconName: 'Users' }
+      { text: 'Led the build of a mobile-first React app for 401k retirement transfers, a process that used to take weeks of paperwork and now takes 80% less time', iconName: 'Code' },
+      { text: 'Designed the shared UI library, shipped as an npm package with Storybook and 80% test coverage, so every team built from the same components instead of reinventing them', iconName: 'Target' },
+      { text: 'Set up continuous deployment from Bitbucket to AWS S3 and wired the React frontend to a Spring Boot backend', iconName: 'Zap' },
+      { text: 'Worked directly with the CTO and UX to turn rough product ideas into technical specs we could actually build', iconName: 'Users' }
     ],
-    technologies: ['React', 'TypeScript', 'Node.js', 'Styled Components', 'Storybook', 'AWS S3', 'Spring Boot', 'REST APIs', 'Bitbucket'],
+    technologies: ['React', 'TypeScript', 'Node.js', 'Storybook', 'AWS S3', 'Styled Components', 'Spring Boot', 'REST APIs', 'Bitbucket'],
     type: 'work'
   },
   {
@@ -86,15 +87,15 @@ export const experience: ExperienceEntry[] = [
     period: 'July 2019 - July 2021',
     year: '2019',
     location: 'Chicago, IL',
-    description: 'Graduate degree in Computer Science at Illinois Institute of Technology, completed alongside my first US engineering role.',
+    description: 'I earned my MS in Computer Science while working my first US engineering role full time, so everything I learned in the evening went into production during the day.',
     achievements: [
       { metric: '3.6', description: 'GPA out of 4.0', iconName: 'Target' },
       { metric: '1st', description: 'Hacktober 2021 winner', iconName: 'TrendingUp' }
     ],
     responsibilities: [
-      { text: 'Completed an MS in Computer Science at Illinois Institute of Technology with a 3.6/4.0 GPA', iconName: 'Target' },
-      { text: 'Won Hacktober 2021, hosted by Code Platoon and Illinois Joining Forces (IJF)', iconName: 'TrendingUp' },
-      { text: 'Started as a Front End Developer at ManifestHQ while completing the degree', iconName: 'Code' }
+      { text: 'Finished an MS in Computer Science at Illinois Institute of Technology with a 3.6/4.0 GPA', iconName: 'Target' },
+      { text: 'Took first place at Hacktober 2021, hosted by Code Platoon and Illinois Joining Forces', iconName: 'TrendingUp' },
+      { text: 'Joined ManifestHQ as a Front End Developer partway through, and finished the degree while shipping', iconName: 'Code' }
     ],
     technologies: [],
     type: 'education'
@@ -107,19 +108,19 @@ export const experience: ExperienceEntry[] = [
     year: '2017',
     location: 'Bangalore, India',
     remote: true,
-    description: 'Reviewed student projects for Data Scientist Nanodegree and mentored batches of 30 students.',
+    description: 'I reviewed code and mentored students working through Udacity\'s Data Scientist Nanodegree, which is where I learned to give feedback that people can actually act on.',
     achievements: [
       { metric: '500+', description: 'Projects reviewed', iconName: 'Target' },
       { metric: '30', description: 'Students per batch', iconName: 'Users' },
       { metric: '95%', description: 'Student satisfaction', iconName: 'TrendingUp' }
     ],
     responsibilities: [
-      { text: "Reviewed student projects for Udacity's Data Scientist Nanodegree, ensuring high-quality deliverables and learning outcomes", iconName: 'Target' },
-      { text: 'Mentored batches of 30 students, providing personalized guidance and support throughout their learning journey', iconName: 'Users' },
-      { text: 'Improved student engagement and graduation rates through effective teaching methodologies and mentorship', iconName: 'TrendingUp' },
-      { text: 'Contributed to curriculum development and assessment strategies for Data Science education', iconName: 'Code' }
+      { text: "Reviewed 500+ student projects for Udacity's Data Scientist Nanodegree, giving line-level feedback on Python, statistics, and machine learning work", iconName: 'Target' },
+      { text: 'Mentored batches of 30 students at a time, holding a 95% satisfaction rating across the program', iconName: 'Users' },
+      { text: 'Helped lift engagement and graduation rates by figuring out where students consistently got stuck and addressing it early in the cohort', iconName: 'TrendingUp' },
+      { text: 'Contributed to curriculum and assessment design for the Data Science track', iconName: 'Code' }
     ],
-    technologies: ['Python', 'Data Science', 'Machine Learning', 'Mentoring', 'Curriculum Development', 'Assessment'],
+    technologies: ['Python', 'Machine Learning', 'Data Science', 'Code Review', 'Mentoring', 'Curriculum Design'],
     type: 'work'
   },
   {
@@ -129,19 +130,20 @@ export const experience: ExperienceEntry[] = [
     period: 'March 2016 - July 2019',
     year: '2016',
     location: 'Bangalore, India',
-    description: 'Championed Agile methodologies across full SDLC, pioneered web automation framework.',
+    description: 'I built enterprise applications for telecom clients, and wrote the internal tooling that took the tedious parts of the job off the team\'s plate.',
     achievements: [
       { metric: '70%', description: 'Testing time reduction', iconName: 'TrendingUp' },
       { metric: '90%', description: 'Data validation time saved', iconName: 'Target' },
       { metric: '5+', description: 'Enterprise applications delivered', iconName: 'Globe' }
     ],
     responsibilities: [
-      { text: 'Championed Agile Methodologies across full SDLC, crafting enterprise applications with Microservices architecture and Object-Oriented design', iconName: 'Code' },
-      { text: 'Pioneered innovative solutions, including new web automation framework for Telecom Client, shortening testing time by 70%', iconName: 'Zap' },
-      { text: 'Authored custom Data Management Tool using Python & Java, minimizing data validation time by 90%, resulting in faster project turnaround', iconName: 'Target' },
-      { text: 'Architected and implemented comprehensive Unit, Regression, and Integration test scripts; engineered responsive UI features in React', iconName: 'Shield' }
+      { text: 'Built and shipped 5+ enterprise applications on a microservices architecture, working the full lifecycle from design through release', iconName: 'Code' },
+      { text: 'Wrote a web automation framework for a telecom client that cut testing time by 70%, replacing manual regression passes that used to eat entire sprints', iconName: 'Zap' },
+      { text: 'Built a custom data management tool in Python and Java that took data validation from days to hours, a 90% cut that sped up every project it touched', iconName: 'Target' },
+      { text: 'Wrote the unit, regression, and integration suites the team relied on, and built responsive UI features in React', iconName: 'Shield' },
+      { text: 'Pushed the team toward Agile practices across the full SDLC, running the ceremonies and helping the team actually stick with them', iconName: 'Users' }
     ],
-    technologies: ['Python', 'Java', 'Node.js', 'Express', 'React', 'Microservices', 'Agile', 'HTML', 'CSS', 'Testing'],
+    technologies: ['Java', 'Python', 'React', 'Microservices', 'Node.js', 'Express', 'Testing', 'Agile', 'HTML', 'CSS'],
     type: 'work'
   }
 ]

@@ -41,6 +41,9 @@ const logoMap: Record<string, string> = {
 const typeIcon = (type: ExperienceEntry['type'], className = 'w-4 h-4') =>
   type === 'education' ? <Award className={className} /> : <Briefcase className={className} />
 
+/** Chips shown before the "+N more" affordance — roughly one wrapped row. */
+const TECH_CHIP_LIMIT = 5
+
 /* -------------------------------------------------------------------------- */
 /*  Rail identity: one distinct year gradient per entry.                       */
 /*  Accents are shared (ManifestHQ + IBM are both "blue"), so the rail keeps   */
@@ -568,15 +571,15 @@ const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelec
           direction={direction}
           reduced={reduced}
           render={(item) => {
-            const meta = [item.remote ? 'Remote' : item.location, durationLabel(item.period)].filter(Boolean)
+            /* The badge above already calls out Remote, so this keeps the city:
+               the rail is the only desktop surface that shows it. The job title
+               lives on the card heading and is deliberately not repeated here. */
+            const meta = [item.location, durationLabel(item.period)].filter(Boolean)
 
             return (
               <>
-                <div className="text-lg font-bold text-gray-900 dark:text-white leading-snug mb-1">
+                <div className="text-lg font-bold text-gray-900 dark:text-white leading-snug mb-2">
                   {item.company}
-                </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug mb-2">
-                  {item.title}
                 </div>
                 {meta.length > 0 && (
                   <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -1007,10 +1010,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
                   >
                     {item.company}
                   </span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</span>
-                  <span className="text-[11px] text-gray-400/80 dark:text-gray-500/80 truncate">
-                    {item.remote ? 'Remote' : cityOf(item.location)}
-                  </span>
+                  <time className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</time>
                 </span>
               </button>
             </li>
@@ -1047,8 +1047,19 @@ const ExperienceCard = ({
   const dimmed = !isMobile && !isActive
   const accent = railAccent(item)
   const [open, setOpen] = useState(false)
+  const [techExpanded, setTechExpanded] = useState(false)
   const panelId = `experience-${item.id}-responsibilities`
   const headingId = `experience-${item.id}-heading`
+  const techListId = `experience-${item.id}-technologies`
+
+  /* Cards carry up to 10 chips, which wrap to three unranked rows and bury the
+     signal. Show the leading few (data/experience.ts lists the most relevant
+     first) and let the rest be revealed on demand. */
+  const hiddenTechCount = Math.max(item.technologies.length - TECH_CHIP_LIMIT, 0)
+  const visibleTech =
+    techExpanded || hiddenTechCount === 0
+      ? item.technologies
+      : item.technologies.slice(0, TECH_CHIP_LIMIT)
 
   const revealStyle: CSSProperties | undefined = reduced
     ? undefined
@@ -1109,22 +1120,29 @@ const ExperienceCard = ({
 
         <h4
           id={headingId}
-          className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 leading-snug"
+          className={`text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug ${
+            /* Mobile: the meta row below supplies the gap. Desktop: it is gone, so own it here. */
+            isMobile ? 'mb-2' : 'mb-4'
+          }`}
         >
           {item.title}{' '}
           <span className={`font-semibold ${accent.text}`}>@{item.company}</span>
         </h4>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <span className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-            <time className="font-medium">{item.period}</time>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-            <span>{item.remote ? `${item.location} · Remote` : item.location}</span>
-          </span>
-        </div>
+        {/* Desktop hides this: the sticky rail owns period + location there.
+            Mobile has no rail, so the card keeps them. */}
+        {isMobile && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+              <time className="font-medium">{item.period}</time>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+              <span>{item.remote ? `${item.location} · Remote` : item.location}</span>
+            </span>
+          </div>
+        )}
 
         {item.progression && item.progression.length > 1 && (
           <ol className="flex items-start mb-5 list-none" aria-label={`Roles at ${item.company}`}>
@@ -1258,8 +1276,8 @@ const ExperienceCard = ({
             <h5 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mt-5 mb-2">
               Technologies
             </h5>
-            <ul className="flex flex-wrap gap-1.5">
-              {item.technologies.map((tech) => (
+            <ul id={techListId} className="flex flex-wrap gap-1.5">
+              {visibleTech.map((tech) => (
                 <li
                   key={tech}
                   className={`px-2 py-1 text-xs font-medium rounded-md bg-gray-100/80 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60 ${
@@ -1269,6 +1287,24 @@ const ExperienceCard = ({
                   {tech}
                 </li>
               ))}
+              {hiddenTechCount > 0 && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setTechExpanded((value) => !value)}
+                    aria-expanded={techExpanded}
+                    aria-controls={techListId}
+                    className={`px-2 py-1 text-xs font-semibold rounded-md border border-dashed border-gray-300/80 dark:border-gray-600/80 ${accent.text} ${
+                      reduced ? '' : 'transition-colors duration-200'
+                    } hover:bg-gray-100/80 dark:hover:bg-gray-800/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500 dark:focus-visible:ring-offset-gray-900`}
+                  >
+                    {techExpanded
+                      ? 'Show less'
+                      : `+${hiddenTechCount} more`}
+                    <span className="sr-only"> technologies used at {item.company}</span>
+                  </button>
+                </li>
+              )}
             </ul>
           </>
         )}

@@ -51,7 +51,7 @@ const railGradients: Record<string, string> = {
   adobe: 'from-red-500 to-orange-500',
   manifesthq: 'from-indigo-500 to-purple-500',
   iit: 'from-amber-500 to-rose-500',
-  udacity: 'from-cyan-500 to-teal-500',
+  udacity: 'from-green-500 to-cyan-500',
   ibm: 'from-blue-700 to-sky-400',
 }
 
@@ -59,7 +59,7 @@ const railHexes: Record<string, string> = {
   adobe: '#f97316',
   manifesthq: '#8b5cf6',
   iit: '#f43f5e',
-  udacity: '#14b8a6',
+  udacity: '#10b981',
   ibm: '#38bdf8',
 }
 
@@ -68,7 +68,7 @@ const railGradientStops: Record<string, [string, string]> = {
   adobe: ['#ef4444', '#f97316'],
   manifesthq: ['#6366f1', '#a855f7'],
   iit: ['#f59e0b', '#f43f5e'],
-  udacity: ['#06b6d4', '#14b8a6'],
+  udacity: ['#22c55e', '#06b6d4'],
   ibm: ['#1d4ed8', '#38bdf8'],
 }
 
@@ -510,16 +510,14 @@ const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelec
             return (
               <div className="flex items-center gap-3">
                 {logoMap[item.company] ? (
-                  <span className="w-11 h-11 rounded-xl bg-white ring-1 ring-gray-200 dark:ring-white/15 shadow-sm flex items-center justify-center p-1.5">
-                    <img
-                      src={logoMap[item.company]}
-                      alt=""
-                      aria-hidden="true"
-                      className="max-w-full max-h-full object-contain"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </span>
+                  <img
+                    src={logoMap[item.company]}
+                    alt=""
+                    aria-hidden="true"
+                    className="w-11 h-11 object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   <div
                     className={`w-11 h-11 rounded-xl bg-gradient-to-r ${gradient} flex items-center justify-center text-white shadow-sm`}

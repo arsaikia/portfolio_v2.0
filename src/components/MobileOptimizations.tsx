@@ -7,7 +7,7 @@ const MobileOptimizations = () => {
   useEffect(() => {
     // Detect mobile and touch devices
     const checkDevice = () => {
-      const mobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const mobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
       
       setIsMobile(mobile)

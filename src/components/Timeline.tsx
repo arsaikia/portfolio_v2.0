@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import {
   Calendar,
@@ -394,13 +394,27 @@ const roadPoints = (count: number): Pt[] => {
 
 const buildRoad = (count: number) => smoothPath(roadPoints(count))
 
-/** Continues past the last stop and trails off, hinting at earlier roles. */
+/** Dots continuing past the last stop and fading out, hinting at earlier, unlisted roles. */
+const TAIL_DOTS = 6
 const buildTail = (count: number) => {
   const last = count - 1
   const x = stopX(last)
   const y = stopY(last)
-  const dx = x - (stopX(last - 1) + stopX(last)) / 2
-  return `M ${x} ${y} C ${x + dx * 0.6} ${y + TAIL * 0.4}, ${ROAD_CX} ${y + TAIL * 0.6}, ${ROAD_CX - 2} ${y + TAIL}`
+  const dx = count > 1 ? x - (stopX(last - 1) + stopX(last)) / 2 : 0
+  // Cubic Bézier from the last stop drifting back toward the centre
+  const p1 = { x: x + dx * 0.6, y: y + TAIL * 0.4 }
+  const p2 = { x: ROAD_CX, y: y + TAIL * 0.6 }
+  const p3 = { x: ROAD_CX - 2, y: y + TAIL }
+  return Array.from({ length: TAIL_DOTS }, (_, k) => {
+    const t = (k + 1) / TAIL_DOTS
+    const u = 1 - t
+    return {
+      x: u * u * u * x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x,
+      y: u * u * u * y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y,
+      r: 1.9 - k * 0.2,
+      opacity: +(0.85 - k * 0.13).toFixed(2),
+    }
+  })
 }
 
 /* Travel icons (drawn pointing right, +x = direction of travel; ~14px before scaling) */
@@ -453,7 +467,6 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
   const total = useRef(0)
   const current = useRef(progress)
   const target = useRef(progress)
-  const tailFadeId = useId()
 
   /* Cache path length at each stop (y is monotonic along the road) */
   useEffect(() => {
@@ -589,19 +602,6 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         height={height}
         aria-hidden="true"
       >
-        <defs>
-          <linearGradient
-            id={tailFadeId}
-            x1="0"
-            y1={stopY(items.length - 1)}
-            x2="0"
-            y2={stopY(items.length - 1) + TAIL}
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0" stopColor="currentColor" stopOpacity={1} />
-            <stop offset="1" stopColor="currentColor" stopOpacity={0} />
-          </linearGradient>
-        </defs>
 
         {/* Road: faint track with a dotted centre line */}
         <path d={d} fill="none" strokeWidth={4} strokeLinecap="round" className="stroke-gray-200/50 dark:stroke-gray-700/40" />
@@ -615,15 +615,11 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         />
 
         {/* Faded dotted tail: earlier history not shown */}
-        <path
-          d={tail}
-          fill="none"
-          stroke={`url(#${tailFadeId})`}
-          strokeWidth={2.5}
-          strokeDasharray="0.5 6"
-          strokeLinecap="round"
-          className="text-gray-400 dark:text-gray-500"
-        />
+        <g className="fill-gray-400 dark:fill-gray-500">
+          {tail.map((dot, k) => (
+            <circle key={k} cx={dot.x} cy={dot.y} r={dot.r} opacity={dot.opacity} />
+          ))}
+        </g>
 
         {/* Travelled trail (dash offset driven from the rAF loop) */}
         <path

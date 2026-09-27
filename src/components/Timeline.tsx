@@ -35,6 +35,7 @@ const logoMap: Record<string, string> = {
   ManifestHQ: '/logo_manifest.png',
   IBM: '/logo_ibm.png',
   Udacity: '/logo_udacity.png',
+  'Illinois Tech': '/logo_illinoistech.png',
 }
 
 const typeIcon = (type: ExperienceEntry['type'], className = 'w-4 h-4') =>
@@ -339,19 +340,60 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
 
 const STOP_GAP = 60
 const ROAD_W = 56
-const ROAD_AMP = 11
 const ROAD_CX = ROAD_W / 2
+/** Hand-tuned, irregular stop offsets so the road meanders instead of zig-zagging evenly. */
+const STOP_OFFSETS = [-9, 7, -2, 12, -6, 4, -11]
+/** Small drift between stops so each bend has a different shape. */
+const WANDER = [0, 5, -4, 2, -6, 3, -2]
+/** Length of the faded dotted tail after the last stop (earlier, unlisted history). */
+const TAIL = 40
 
-const stopX = (i: number) => ROAD_CX + (i % 2 === 0 ? -ROAD_AMP : ROAD_AMP)
+type Pt = { x: number; y: number }
+
+const stopX = (i: number) => ROAD_CX + STOP_OFFSETS[i % STOP_OFFSETS.length]
 const stopY = (i: number) => STOP_GAP / 2 + i * STOP_GAP
 
-const buildRoad = (count: number) => {
-  let d = `M ${stopX(0)} ${stopY(0)}`
-  for (let i = 1; i < count; i++) {
-    const mid = (stopY(i - 1) + stopY(i)) / 2
-    d += ` C ${stopX(i - 1)} ${mid}, ${stopX(i)} ${mid}, ${stopX(i)} ${stopY(i)}`
+/** Catmull-Rom spline through the points, emitted as cubic Béziers. */
+const smoothPath = (pts: Pt[]) => {
+  if (pts.length === 0) return ''
+  let d = `M ${pts[0].x} ${pts[0].y}`
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2] ?? p2
+    const c1x = p1.x + (p2.x - p0.x) / 6
+    const c1y = p1.y + (p2.y - p0.y) / 6
+    const c2x = p2.x - (p3.x - p1.x) / 6
+    const c2y = p2.y - (p3.y - p1.y) / 6
+    d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2.x} ${p2.y}`
   }
   return d
+}
+
+const roadPoints = (count: number): Pt[] => {
+  const pts: Pt[] = []
+  for (let i = 0; i < count; i++) {
+    if (i > 0) {
+      pts.push({
+        x: (stopX(i - 1) + stopX(i)) / 2 + WANDER[i % WANDER.length],
+        y: (stopY(i - 1) + stopY(i)) / 2,
+      })
+    }
+    pts.push({ x: stopX(i), y: stopY(i) })
+  }
+  return pts
+}
+
+const buildRoad = (count: number) => smoothPath(roadPoints(count))
+
+/** Continues past the last stop and trails off, hinting at earlier roles. */
+const buildTail = (count: number) => {
+  const last = count - 1
+  const x = stopX(last)
+  const y = stopY(last)
+  const dx = x - (stopX(last - 1) + stopX(last)) / 2
+  return `M ${x} ${y} C ${x + dx * 0.6} ${y + TAIL * 0.4}, ${ROAD_CX} ${y + TAIL * 0.6}, ${ROAD_CX - 2} ${y + TAIL}`
 }
 
 interface RoadNavProps {
@@ -365,6 +407,7 @@ interface RoadNavProps {
 
 const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavProps) => {
   const d = useMemo(() => buildRoad(items.length), [items.length])
+  const tail = useMemo(() => buildTail(items.length), [items.length])
   const height = stopY(items.length - 1) + STOP_GAP / 2
   const trailRef = useRef<SVGPathElement>(null)
   const markerRef = useRef<SVGGElement>(null)
@@ -374,6 +417,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
   const target = useRef(progress)
   const gradientId = useId()
   const glowId = useId()
+  const tailFadeId = useId()
 
   /* Cache path length at each stop (y is monotonic along the road) */
   useEffect(() => {
@@ -431,7 +475,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
   const activeHex = getAccent(items[activeIndex]?.accent ?? 'blue').hex
 
   return (
-    <nav className="relative mt-8" aria-label="Jump to role" style={{ height }}>
+    <nav className="relative mt-8" aria-label="Jump to role" style={{ height, marginBottom: TAIL - STOP_GAP / 2 }}>
       <svg
         className="absolute left-0 top-0 overflow-visible pointer-events-none"
         width={ROAD_W}
@@ -448,6 +492,17 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
               />
             ))}
           </linearGradient>
+          <linearGradient
+            id={tailFadeId}
+            x1="0"
+            y1={stopY(items.length - 1)}
+            x2="0"
+            y2={stopY(items.length - 1) + TAIL}
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0" stopColor="currentColor" stopOpacity={0.9} />
+            <stop offset="1" stopColor="currentColor" stopOpacity={0} />
+          </linearGradient>
           <filter id={glowId} x="-100%" y="-100%" width="300%" height="300%">
             <feGaussianBlur stdDeviation="3" />
           </filter>
@@ -462,6 +517,17 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           strokeDasharray="1 5"
           strokeLinecap="round"
           className="stroke-gray-400/60 dark:stroke-gray-500/50"
+        />
+
+        {/* Faded dotted tail: earlier history not shown */}
+        <path
+          d={tail}
+          fill="none"
+          stroke={`url(#${tailFadeId})`}
+          strokeWidth={2}
+          strokeDasharray="0.5 5"
+          strokeLinecap="round"
+          className="text-gray-400 dark:text-gray-500"
         />
 
         {/* Travelled trail (dash offset driven from the rAF loop) */}

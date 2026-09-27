@@ -23,6 +23,8 @@ export interface ExperienceEntry {
   type: 'work' | 'education'
   color: string
   accent: string
+  /** Role changes within the same company, oldest first. */
+  progression?: { title: string; year: string }[]
 }
 
 export const experience: ExperienceEntry[] = [
@@ -50,7 +52,12 @@ export const experience: ExperienceEntry[] = [
     technologies: ['React', 'Node.js', 'TypeScript', 'GraphQL', 'Adobe Spectrum', 'Franklin Framework', 'Python', 'Java', 'Express', 'Microservices'],
     type: 'work',
     color: 'from-red-500 to-orange-500',
-    accent: 'red'
+    accent: 'red',
+    progression: [
+      { title: 'Joined as Full Stack Engineer', year: '2021' },
+      { title: 'Promoted', year: '2022' },
+      { title: 'Senior Full Stack Engineer', year: '2025' }
+    ]
   },
   {
     id: 'manifesthq',
@@ -75,6 +82,28 @@ export const experience: ExperienceEntry[] = [
     type: 'work',
     color: 'from-blue-600 to-indigo-600',
     accent: 'blue'
+  },
+  {
+    id: 'iit',
+    title: 'MS in Computer Science',
+    company: 'Illinois Tech',
+    period: 'July 2019 - July 2021',
+    year: '2019',
+    location: 'Chicago, IL',
+    description: 'Graduate degree in Computer Science at Illinois Institute of Technology, completed alongside my first US engineering role.',
+    achievements: [
+      { metric: '3.6', description: 'GPA out of 4.0', iconName: 'Target' },
+      { metric: '1st', description: 'Hacktober 2021 winner', iconName: 'TrendingUp' }
+    ],
+    responsibilities: [
+      { text: 'Completed an MS in Computer Science at Illinois Institute of Technology with a 3.6/4.0 GPA', iconName: 'Target' },
+      { text: 'Won Hacktober 2021, hosted by Code Platoon and Illinois Joining Forces (IJF)', iconName: 'TrendingUp' },
+      { text: 'Started as a Front End Developer at ManifestHQ while completing the degree', iconName: 'Code' }
+    ],
+    technologies: [],
+    type: 'education',
+    color: 'from-green-500 to-emerald-500',
+    accent: 'green'
   },
   {
     id: 'udacity',

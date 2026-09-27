@@ -453,15 +453,15 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           </filter>
         </defs>
 
-        {/* Asphalt + lane markings */}
-        <path d={d} fill="none" strokeWidth={10} strokeLinecap="round" className="stroke-gray-200 dark:stroke-gray-700/80" />
+        {/* Road: faint track with a dotted centre line */}
+        <path d={d} fill="none" strokeWidth={6} strokeLinecap="round" className="stroke-gray-200/70 dark:stroke-gray-700/50" />
         <path
           d={d}
           fill="none"
-          strokeWidth={1.25}
-          strokeDasharray="3 6"
+          strokeWidth={1}
+          strokeDasharray="1 5"
           strokeLinecap="round"
-          className="stroke-white/90 dark:stroke-gray-900/80"
+          className="stroke-gray-400/60 dark:stroke-gray-500/50"
         />
 
         {/* Travelled trail (dash offset driven from the rAF loop) */}
@@ -470,7 +470,8 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           d={d}
           fill="none"
           stroke={`url(#${gradientId})`}
-          strokeWidth={4}
+          strokeOpacity={0.45}
+          strokeWidth={2.5}
           strokeLinecap="round"
           strokeDasharray="10000"
           strokeDashoffset="10000"
@@ -480,19 +481,18 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         {items.map((item, i) => {
           const hex = getAccent(item.accent).hex
           const isActive = i === activeIndex
-          const passed = i <= progress + 0.001
           return (
             <g key={item.id} transform={`translate(${stopX(i)} ${stopY(i)})`}>
               <circle
-                r={isActive ? 11 : 0}
+                r={isActive ? 10 : 0}
                 fill={hex}
-                opacity={0.18}
+                opacity={0.14}
                 style={{ transition: reduced ? 'none' : `r 420ms ${EASE_STATE}` }}
               />
               <circle
-                r={5.5}
-                fill={passed ? hex : 'currentColor'}
-                strokeWidth={2.5}
+                r={4.5}
+                fill={isActive ? hex : 'currentColor'}
+                strokeWidth={2}
                 className="text-gray-300 dark:text-gray-600 stroke-gray-50 dark:stroke-gray-900"
                 style={{ transition: reduced ? 'none' : `fill 320ms ${EASE_STATE}` }}
               />
@@ -503,23 +503,17 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         {/* Travelling marker */}
         <g ref={markerRef} transform={`translate(${stopX(0)} ${stopY(0)})`}>
           <circle
-            r={9}
+            r={8}
             fill={activeHex}
-            opacity={0.55}
+            opacity={0.3}
             filter={`url(#${glowId})`}
             style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}
           />
-          {!reduced && (
-            <circle r={7} fill="none" stroke={activeHex} strokeWidth={1.5} opacity={0.6}>
-              <animate attributeName="r" values="7;14" dur="1.8s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.6;0" dur="1.8s" repeatCount="indefinite" />
-            </circle>
-          )}
           <circle
-            r={6.5}
+            r={5.5}
             fill="white"
             stroke={activeHex}
-            strokeWidth={3}
+            strokeWidth={2.5}
             style={{ transition: reduced ? 'none' : `stroke 420ms ${EASE_STATE}` }}
           />
         </g>
@@ -672,6 +666,44 @@ const ExperienceCard = ({
           </span>
         </div>
 
+        {item.progression && item.progression.length > 1 && (
+          <ol className="flex items-start mb-5 list-none" aria-label={`Roles at ${item.company}`}>
+            {item.progression.map((step, i, steps) => {
+              const isLast = i === steps.length - 1
+              return (
+                <li key={step.year} className="relative flex-1 min-w-0 pr-3">
+                  {!isLast && (
+                    <span
+                      className="absolute left-3 right-0 top-[4px] h-px bg-gray-200 dark:bg-gray-700"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span
+                    className={`relative block w-2.5 h-2.5 rounded-full ${
+                      isLast ? accent.dot : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={`block mt-2 text-xs font-semibold tabular-nums ${
+                      isLast ? accent.text : 'text-gray-400 dark:text-gray-500'
+                    }`}
+                  >
+                    {step.year}
+                  </span>
+                  <span
+                    className={`block text-xs leading-snug ${
+                      isLast ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                  >
+                    {step.title}
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
+        )}
+
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
           {item.description}
         </p>
@@ -716,7 +748,7 @@ const ExperienceCard = ({
           aria-controls={panelId}
           className={`group inline-flex items-center gap-1.5 text-xs font-semibold ${accent.text} rounded-md mb-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800`}
         >
-          {open ? 'Hide what I did' : `What I did (${item.responsibilities.length})`}
+          {open ? 'Hide details' : `${item.type === 'education' ? 'Highlights' : 'What I did'} (${item.responsibilities.length})`}
           <ChevronDown
             className="w-3.5 h-3.5"
             aria-hidden="true"
@@ -756,21 +788,25 @@ const ExperienceCard = ({
         </div>
 
         {/* Technologies */}
-        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mt-5 mb-2">
-          Technologies
-        </h4>
-        <ul className="flex flex-wrap gap-1.5">
-          {item.technologies.map((tech) => (
-            <li
-              key={tech}
-              className={`px-2 py-1 text-xs font-medium rounded-md bg-gray-100/80 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60 ${
-                reduced ? '' : 'transition-colors duration-200'
-              } hover:border-gray-300/80 dark:hover:border-gray-600/80`}
-            >
-              {tech}
-            </li>
-          ))}
-        </ul>
+        {item.technologies.length > 0 && (
+          <>
+            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mt-5 mb-2">
+              Technologies
+            </h4>
+            <ul className="flex flex-wrap gap-1.5">
+              {item.technologies.map((tech) => (
+                <li
+                  key={tech}
+                  className={`px-2 py-1 text-xs font-medium rounded-md bg-gray-100/80 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60 ${
+                    reduced ? '' : 'transition-colors duration-200'
+                  } hover:border-gray-300/80 dark:hover:border-gray-600/80`}
+                >
+                  {tech}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </article>
     </li>
   )

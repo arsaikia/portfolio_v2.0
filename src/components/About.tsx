@@ -37,7 +37,12 @@ const About = () => {
             <section className="mb-8" aria-labelledby="experience-heading">
               {/* Sticks under the site header while the timeline scrolls;
                   releases with the section. Doubles as the bio/career separator. */}
-              <div className="sticky top-16 z-30 -mx-4 px-4 mb-8 py-3 bg-gray-50/85 dark:bg-gray-900/85 backdrop-blur-md">
+              <div className="sticky top-16 z-30 -mx-4 px-4 mb-8 py-3 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md">
+                {/* Soft fade so cards dissolve under the bar instead of a hard cut */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-full h-8 bg-gradient-to-b from-white/70 to-transparent dark:from-gray-900/70"
+                  aria-hidden="true"
+                />
                 <div className="flex items-center gap-4">
                   <span className="h-px flex-1 bg-gradient-to-r from-transparent to-gray-300 dark:to-gray-700" aria-hidden="true" />
                   <h3

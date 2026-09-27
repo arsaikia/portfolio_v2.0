@@ -309,22 +309,10 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
               <div className="text-lg font-bold text-gray-900 dark:text-white leading-snug mb-1">
                 {item.company}
               </div>
-              <div className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug mb-4">
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug">
                 {item.title}
               </div>
 
-              <dl className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                  <dt className="sr-only">Period</dt>
-                  <dd>{item.period}</dd>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-                  <dt className="sr-only">Location</dt>
-                  <dd>{item.location}</dd>
-                </div>
-              </dl>
             </div>
           )
         })}
@@ -371,28 +359,23 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
                     }}
                     aria-hidden="true"
                   />
-                  <span
-                    className={`text-sm font-semibold ${
-                      isActive
-                        ? accent.text
-                        : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'
-                    }`}
-                    style={{
-                      transitionProperty: 'color',
-                      transitionDuration: reduced ? '0ms' : '320ms',
-                      transitionTimingFunction: EASE_STATE,
-                    }}
-                  >
-                    {item.year}
-                  </span>
-                  <span className="sr-only">Jump to {item.company}</span>
-                  <span
-                    className={`text-xs truncate ${
-                      isActive ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {item.company}
+                  <span className="sr-only">Jump to </span>
+                  <span className="flex flex-col min-w-0">
+                    <span
+                      className={`text-sm font-semibold truncate ${
+                        isActive
+                          ? accent.text
+                          : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                      }`}
+                      style={{
+                        transitionProperty: 'color',
+                        transitionDuration: reduced ? '0ms' : '320ms',
+                        transitionTimingFunction: EASE_STATE,
+                      }}
+                    >
+                      {item.company}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</span>
                   </span>
                 </button>
               </li>
@@ -414,6 +397,7 @@ interface ExperienceCardProps {
   isMobile: boolean
   reduced: boolean
   revealed: boolean
+  isActive: boolean
   registerRef: (el: HTMLLIElement | null) => void
 }
 
@@ -423,8 +407,10 @@ const ExperienceCard = ({
   isMobile,
   reduced,
   revealed,
+  isActive,
   registerRef,
 }: ExperienceCardProps) => {
+  const dimmed = !isMobile && !isActive
   const accent = getAccent(item.accent)
   const [open, setOpen] = useState(false)
   const panelId = `experience-${item.id}-responsibilities`
@@ -446,9 +432,13 @@ const ExperienceCard = ({
     <li ref={registerRef} data-timeline-item={item.id} className="scroll-mt-36" style={revealStyle}>
       <article
         aria-labelledby={headingId}
-        className={`relative overflow-hidden rounded-2xl bg-white/90 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/60 dark:border-gray-700/60 shadow-sm hover:shadow-lg p-5 sm:p-6 ${
-          reduced ? '' : 'transition-shadow duration-300'
-        }`}
+        className="relative overflow-hidden rounded-2xl bg-white/90 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/60 dark:border-gray-700/60 shadow-sm hover:shadow-lg hover:!opacity-100 p-5 sm:p-6"
+        style={{
+          opacity: dimmed ? 0.55 : 1,
+          transitionProperty: 'opacity, box-shadow',
+          transitionDuration: reduced ? '0ms' : '420ms',
+          transitionTimingFunction: EASE_STATE,
+        }}
       >
         <div
           className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${accent.gradient}`}
@@ -746,6 +736,7 @@ const Timeline = () => {
               isMobile={isMobile}
               reduced={reduced}
               revealed={revealed[index] ?? false}
+              isActive={index === activeIndex}
               registerRef={registerRef(index)}
             />
           ))}

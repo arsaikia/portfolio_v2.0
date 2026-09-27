@@ -47,29 +47,59 @@ const typeIcon = (type: ExperienceEntry['type'], className = 'w-4 h-4') =>
 /*  its own map — fully-spelled classes so Tailwind can extract them.          */
 /* -------------------------------------------------------------------------- */
 
-const railGradients: Record<string, string> = {
-  adobe: 'from-red-500 to-orange-500',
-  manifesthq: 'from-indigo-500 to-purple-500',
-  iit: 'from-amber-500 to-rose-500',
-  udacity: 'from-green-500 to-cyan-500',
-  ibm: 'from-blue-700 to-sky-400',
+type RailAccent = {
+  /** Gradient shared by the year odometer, the card top-bar and logo fallbacks. */
+  gradient: string
+  /** Endpoint hexes of `gradient` — the odometer paints a slice per digit. */
+  stops: [string, string]
+  /** Road trail / marker colour: the gradient's dominant end. */
+  hex: string
+  text: string
+  dot: string
+  soft: string
 }
 
-const railHexes: Record<string, string> = {
-  adobe: '#f97316',
-  manifesthq: '#8b5cf6',
-  iit: '#f43f5e',
-  udacity: '#10b981',
-  ibm: '#38bdf8',
-}
-
-/** Odometer digits paint their own slice of one continuous gradient. */
-const railGradientStops: Record<string, [string, string]> = {
-  adobe: ['#ef4444', '#f97316'],
-  manifesthq: ['#6366f1', '#a855f7'],
-  iit: ['#f59e0b', '#f43f5e'],
-  udacity: ['#22c55e', '#06b6d4'],
-  ibm: ['#1d4ed8', '#38bdf8'],
+const railAccents: Record<string, RailAccent> = {
+  adobe: {
+    gradient: 'from-red-500 to-orange-500',
+    stops: ['#ef4444', '#f97316'],
+    hex: '#f97316',
+    text: 'text-red-600 dark:text-red-400',
+    dot: 'bg-red-500',
+    soft: 'bg-red-50 dark:bg-red-950/40',
+  },
+  manifesthq: {
+    gradient: 'from-indigo-500 to-purple-500',
+    stops: ['#6366f1', '#a855f7'],
+    hex: '#8b5cf6',
+    text: 'text-indigo-600 dark:text-indigo-400',
+    dot: 'bg-indigo-500',
+    soft: 'bg-indigo-50 dark:bg-indigo-950/40',
+  },
+  iit: {
+    gradient: 'from-amber-500 to-rose-500',
+    stops: ['#f59e0b', '#f43f5e'],
+    hex: '#f43f5e',
+    text: 'text-amber-600 dark:text-amber-400',
+    dot: 'bg-amber-500',
+    soft: 'bg-amber-50 dark:bg-amber-950/40',
+  },
+  udacity: {
+    gradient: 'from-green-500 to-cyan-500',
+    stops: ['#22c55e', '#06b6d4'],
+    hex: '#10b981',
+    text: 'text-green-600 dark:text-green-400',
+    dot: 'bg-green-500',
+    soft: 'bg-green-50 dark:bg-green-950/40',
+  },
+  ibm: {
+    gradient: 'from-blue-700 to-sky-400',
+    stops: ['#1d4ed8', '#38bdf8'],
+    hex: '#38bdf8',
+    text: 'text-blue-700 dark:text-sky-400',
+    dot: 'bg-blue-600',
+    soft: 'bg-blue-50 dark:bg-blue-950/40',
+  },
 }
 
 const MONTHS = [
@@ -165,6 +195,18 @@ const accentStyles = {
 
 type AccentKey = keyof typeof accentStyles
 const getAccent = (accent: string) => accentStyles[accent as AccentKey] ?? accentStyles.blue
+
+/**
+ * Per-company palette. Accents in the data are shared (ManifestHQ and IBM are
+ * both "blue"), so entries get their own identity here and every surface —
+ * rail year, road trail, card top-bar, card body text — reads from it.
+ */
+const railAccent = (item: Pick<ExperienceEntry, 'id' | 'accent'>): RailAccent => {
+  const rail = railAccents[item.id]
+  if (rail) return rail
+  const base = getAccent(item.accent)
+  return { ...base, stops: [base.hex, base.hex] }
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Motion primitives                                                          */
@@ -459,7 +501,7 @@ const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelec
   const railRef = useRef<HTMLDivElement>(null)
   const [top, setTop] = useState(STICKY_OFFSET)
   const activeItem = items[activeIndex]
-  const bloomHex = railHexes[activeItem?.id ?? ''] ?? getAccent(activeItem?.accent ?? 'blue').hex
+  const bloomHex = activeItem ? railAccent(activeItem).hex : '#3b82f6'
 
   /* Keep the rail vertically centred in the space below the sticky bars */
   useEffect(() => {
@@ -490,9 +532,9 @@ const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelec
           <span
             key={`bloom-${activeIndex}`}
             aria-hidden="true"
-            className="pointer-events-none absolute -z-10 -inset-x-6 -top-6 h-40 animate-ink-bloom"
+            className="pointer-events-none absolute -z-10 -inset-x-8 top-10 h-44 animate-ink-bloom"
             style={{
-              background: `radial-gradient(38% 60% at 22% 40%, ${bloomHex}, transparent 70%)`,
+              background: `radial-gradient(44% 62% at 38% 44%, ${bloomHex}, transparent 70%)`,
             }}
           />
         )}
@@ -504,8 +546,8 @@ const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelec
           reduced={reduced}
           className="mb-4"
           render={(item, index) => {
-            const accent = getAccent(item.accent)
-            const gradient = railGradients[item.id] ?? accent.gradient
+            const accent = railAccent(item)
+            const gradient = accent.gradient
 
             return (
               <div className="flex items-center gap-3">
@@ -557,7 +599,7 @@ const CompanyRail = ({ items, activeIndex, direction, progress, reduced, onSelec
         <div className="text-6xl font-black leading-none tracking-tight mb-3">
           <YearOdometer
             year={activeItem?.year ?? ''}
-            stops={railGradientStops[activeItem?.id ?? ''] ?? ['#2563eb', '#4f46e5']}
+            stops={activeItem ? railAccent(activeItem).stops : ['#2563eb', '#4f46e5']}
             reduced={reduced}
           />
         </div>
@@ -702,7 +744,7 @@ const smoothstep = (t: number) => t * t * (3 - 2 * t)
 
 /** Accent used by the road for an entry — matches the rail year gradient so
  *  ManifestHQ and IBM don't collapse onto the same blue. */
-const entryHex = (item: ExperienceEntry) => railHexes[item.id] ?? getAccent(item.accent).hex
+const entryHex = (item: ExperienceEntry) => railAccent(item).hex
 
 const mixHex = (a: string, b: string, t: number) => {
   const to = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
@@ -978,7 +1020,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
 
       <ul className="relative list-none">
         {items.map((item, index) => {
-          const accent = getAccent(item.accent)
+          const accent = railAccent(item)
           const isActive = index === activeIndex
           return (
             <li key={item.id} style={{ height: STOP_GAP }} className="flex items-center">
@@ -1045,7 +1087,7 @@ const ExperienceCard = ({
   registerRef,
 }: ExperienceCardProps) => {
   const dimmed = !isMobile && !isActive
-  const accent = getAccent(item.accent)
+  const accent = railAccent(item)
   const [open, setOpen] = useState(false)
   const panelId = `experience-${item.id}-responsibilities`
   const headingId = `experience-${item.id}-heading`

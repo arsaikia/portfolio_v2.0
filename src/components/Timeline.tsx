@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import {
   Calendar,
@@ -48,24 +48,28 @@ const typeIcon = (type: ExperienceEntry['type'], className = 'w-4 h-4') =>
 
 const accentStyles = {
   red: {
+    hex: '#ef4444',
     text: 'text-red-600 dark:text-red-400',
     dot: 'bg-red-500',
     soft: 'bg-red-50 dark:bg-red-950/40',
     gradient: 'from-red-500 to-orange-500',
   },
   blue: {
+    hex: '#3b82f6',
     text: 'text-blue-600 dark:text-blue-400',
     dot: 'bg-blue-500',
     soft: 'bg-blue-50 dark:bg-blue-950/40',
     gradient: 'from-blue-600 to-indigo-600',
   },
   purple: {
+    hex: '#a855f7',
     text: 'text-purple-600 dark:text-purple-400',
     dot: 'bg-purple-500',
     soft: 'bg-purple-50 dark:bg-purple-950/40',
     gradient: 'from-purple-600 to-pink-600',
   },
   green: {
+    hex: '#22c55e',
     text: 'text-green-600 dark:text-green-400',
     dot: 'bg-green-500',
     soft: 'bg-green-50 dark:bg-green-950/40',
@@ -318,72 +322,248 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
         })}
       </div>
 
-      {/* Progress rail + jump dots */}
-      <nav className="relative mt-8 pl-1" aria-label="Jump to role">
-        <div className="absolute left-[7px] top-1 bottom-1 w-px bg-gray-200 dark:bg-gray-700" aria-hidden="true">
-          <div
-            className="absolute inset-x-0 top-0 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full origin-top"
-            style={{
-              height: '100%',
-              transform: `scaleY(${progress})`,
-              transitionProperty: 'transform',
-              transitionDuration: reduced ? '0ms' : '180ms',
-              transitionTimingFunction: 'linear',
-              willChange: 'transform',
-            }}
+      <RoadNav
+        items={items}
+        activeIndex={activeIndex}
+        progress={progress}
+        reduced={reduced}
+        onSelect={onSelect}
+      />
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Winding road nav: gradient trail + travelling marker                       */
+/* -------------------------------------------------------------------------- */
+
+const STOP_GAP = 60
+const ROAD_W = 56
+const ROAD_AMP = 11
+const ROAD_CX = ROAD_W / 2
+
+const stopX = (i: number) => ROAD_CX + (i % 2 === 0 ? -ROAD_AMP : ROAD_AMP)
+const stopY = (i: number) => STOP_GAP / 2 + i * STOP_GAP
+
+const buildRoad = (count: number) => {
+  let d = `M ${stopX(0)} ${stopY(0)}`
+  for (let i = 1; i < count; i++) {
+    const mid = (stopY(i - 1) + stopY(i)) / 2
+    d += ` C ${stopX(i - 1)} ${mid}, ${stopX(i)} ${mid}, ${stopX(i)} ${stopY(i)}`
+  }
+  return d
+}
+
+interface RoadNavProps {
+  items: ExperienceEntry[]
+  activeIndex: number
+  /** Fractional stop index: 0 = first stop, items.length - 1 = last stop. */
+  progress: number
+  reduced: boolean
+  onSelect: (index: number) => void
+}
+
+const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavProps) => {
+  const d = useMemo(() => buildRoad(items.length), [items.length])
+  const height = stopY(items.length - 1) + STOP_GAP / 2
+  const trailRef = useRef<SVGPathElement>(null)
+  const markerRef = useRef<SVGGElement>(null)
+  const stopLengths = useRef<number[]>([])
+  const total = useRef(0)
+  const current = useRef(progress)
+  const target = useRef(progress)
+  const gradientId = useId()
+  const glowId = useId()
+
+  /* Cache path length at each stop (y is monotonic along the road) */
+  useEffect(() => {
+    const path = trailRef.current
+    if (!path || typeof path.getTotalLength !== 'function') return
+    const len = path.getTotalLength()
+    total.current = len
+    stopLengths.current = items.map((_, i) => {
+      let lo = 0
+      let hi = len
+      for (let k = 0; k < 24; k++) {
+        const m = (lo + hi) / 2
+        if (path.getPointAtLength(m).y < stopY(i)) lo = m
+        else hi = m
+      }
+      return (lo + hi) / 2
+    })
+  }, [d, items])
+
+  /* Spring the marker toward the scroll target; paint via refs (no re-render) */
+  useEffect(() => {
+    target.current = progress
+  }, [progress])
+
+  useEffect(() => {
+    const path = trailRef.current
+    const marker = markerRef.current
+    if (!path || !marker || typeof path.getPointAtLength !== 'function') return
+
+    let raf = 0
+    const paint = () => {
+      const stops = stopLengths.current
+      if (stops.length === 0 || total.current === 0) return
+      const p = Math.max(0, Math.min(items.length - 1, current.current))
+      const i = Math.min(Math.floor(p), items.length - 2)
+      const f = p - i
+      const len = items.length > 1 ? stops[i] + (stops[i + 1] - stops[i]) * f : 0
+      const pt = path.getPointAtLength(len)
+      path.style.strokeDashoffset = String(total.current - len)
+      marker.setAttribute('transform', `translate(${pt.x} ${pt.y})`)
+    }
+
+    const loop = () => {
+      const delta = target.current - current.current
+      current.current = reduced || Math.abs(delta) < 0.001 ? target.current : current.current + delta * 0.14
+      paint()
+      raf = requestAnimationFrame(loop)
+    }
+
+    // Wait a frame so stop lengths are measured first
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [items.length, reduced])
+
+  const activeHex = getAccent(items[activeIndex]?.accent ?? 'blue').hex
+
+  return (
+    <nav className="relative mt-8" aria-label="Jump to role" style={{ height }}>
+      <svg
+        className="absolute left-0 top-0 overflow-visible pointer-events-none"
+        width={ROAD_W}
+        height={height}
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2={height} gradientUnits="userSpaceOnUse">
+            {items.map((item, i) => (
+              <stop
+                key={item.id}
+                offset={items.length > 1 ? i / (items.length - 1) : 0}
+                stopColor={getAccent(item.accent).hex}
+              />
+            ))}
+          </linearGradient>
+          <filter id={glowId} x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+        </defs>
+
+        {/* Asphalt + lane markings */}
+        <path d={d} fill="none" strokeWidth={10} strokeLinecap="round" className="stroke-gray-200 dark:stroke-gray-700/80" />
+        <path
+          d={d}
+          fill="none"
+          strokeWidth={1.25}
+          strokeDasharray="3 6"
+          strokeLinecap="round"
+          className="stroke-white/90 dark:stroke-gray-900/80"
+        />
+
+        {/* Travelled trail (dash offset driven from the rAF loop) */}
+        <path
+          ref={trailRef}
+          d={d}
+          fill="none"
+          stroke={`url(#${gradientId})`}
+          strokeWidth={4}
+          strokeLinecap="round"
+          strokeDasharray="10000"
+          strokeDashoffset="10000"
+        />
+
+        {/* Stops */}
+        {items.map((item, i) => {
+          const hex = getAccent(item.accent).hex
+          const isActive = i === activeIndex
+          const passed = i <= progress + 0.001
+          return (
+            <g key={item.id} transform={`translate(${stopX(i)} ${stopY(i)})`}>
+              <circle
+                r={isActive ? 11 : 0}
+                fill={hex}
+                opacity={0.18}
+                style={{ transition: reduced ? 'none' : `r 420ms ${EASE_STATE}` }}
+              />
+              <circle
+                r={5.5}
+                fill={passed ? hex : 'currentColor'}
+                strokeWidth={2.5}
+                className="text-gray-300 dark:text-gray-600 stroke-gray-50 dark:stroke-gray-900"
+                style={{ transition: reduced ? 'none' : `fill 320ms ${EASE_STATE}` }}
+              />
+            </g>
+          )
+        })}
+
+        {/* Travelling marker */}
+        <g ref={markerRef} transform={`translate(${stopX(0)} ${stopY(0)})`}>
+          <circle
+            r={9}
+            fill={activeHex}
+            opacity={0.55}
+            filter={`url(#${glowId})`}
+            style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}
           />
-        </div>
+          {!reduced && (
+            <circle r={7} fill="none" stroke={activeHex} strokeWidth={1.5} opacity={0.6}>
+              <animate attributeName="r" values="7;14" dur="1.8s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0" dur="1.8s" repeatCount="indefinite" />
+            </circle>
+          )}
+          <circle
+            r={6.5}
+            fill="white"
+            stroke={activeHex}
+            strokeWidth={3}
+            style={{ transition: reduced ? 'none' : `stroke 420ms ${EASE_STATE}` }}
+          />
+        </g>
+      </svg>
 
-        <ul className="relative space-y-4">
-          {items.map((item, index) => {
-            const accent = getAccent(item.accent)
-            const isActive = index === activeIndex
-
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(index)}
-                  aria-current={isActive ? 'true' : undefined}
-                  className="group flex items-center gap-3 w-full text-left rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+      <ul className="relative list-none">
+        {items.map((item, index) => {
+          const accent = getAccent(item.accent)
+          const isActive = index === activeIndex
+          return (
+            <li key={item.id} style={{ height: STOP_GAP }} className="flex items-center">
+              <button
+                type="button"
+                onClick={() => onSelect(index)}
+                aria-current={isActive ? 'true' : undefined}
+                className="group flex items-center w-full h-full text-left rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+                style={{ paddingLeft: stopX(index) + 22 }}
+              >
+                <span className="sr-only">Jump to </span>
+                <span
+                  className="flex flex-col min-w-0"
+                  style={{
+                    transform: isActive && !reduced ? 'translateX(3px)' : 'translateX(0)',
+                    transition: reduced ? 'none' : `transform 420ms ${EASE_STATE}`,
+                  }}
                 >
                   <span
-                    className={`relative z-10 block w-[15px] h-[15px] rounded-full border-2 border-gray-50 dark:border-gray-900 ${
-                      isActive ? accent.dot : 'bg-gray-300 dark:bg-gray-600 group-hover:bg-gray-400'
+                    className={`text-sm font-semibold truncate ${
+                      isActive
+                        ? accent.text
+                        : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                     }`}
-                    style={{
-                      transform: isActive ? 'scale(1.15)' : 'scale(1)',
-                      transitionProperty: 'transform, background-color',
-                      transitionDuration: reduced ? '0ms' : '320ms',
-                      transitionTimingFunction: EASE_STATE,
-                    }}
-                    aria-hidden="true"
-                  />
-                  <span className="sr-only">Jump to </span>
-                  <span className="flex flex-col min-w-0">
-                    <span
-                      className={`text-sm font-semibold truncate ${
-                        isActive
-                          ? accent.text
-                          : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                      }`}
-                      style={{
-                        transitionProperty: 'color',
-                        transitionDuration: reduced ? '0ms' : '320ms',
-                        transitionTimingFunction: EASE_STATE,
-                      }}
-                    >
-                      {item.company}
-                    </span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</span>
+                    style={{ transition: reduced ? 'none' : `color 320ms ${EASE_STATE}` }}
+                  >
+                    {item.company}
                   </span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      </nav>
-    </div>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</span>
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
   )
 }
 
@@ -680,12 +860,24 @@ const Timeline = () => {
 
     const compute = () => {
       raf = 0
-      const el = listRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      if (rect.height === 0) return
+      const cards = cardRefs.current
+      if (cards.length === 0) return
       const focal = window.innerHeight * FOCAL
-      setProgress(Math.max(0, Math.min(1, (focal - rect.top) / rect.height)))
+      // Each card's centre maps to its stop; interpolate between neighbours
+      const centres = cards.map((c) => {
+        if (!c) return 0
+        const r = c.getBoundingClientRect()
+        return r.top + r.height / 2
+      })
+      let p = 0
+      if (focal >= centres[centres.length - 1]) p = centres.length - 1
+      else if (focal > centres[0]) {
+        const i = centres.findIndex((y, k) => k < centres.length - 1 && focal >= y && focal < centres[k + 1])
+        p = i + (focal - centres[i]) / (centres[i + 1] - centres[i])
+      }
+      setProgress(Math.round(p * 1000) / 1000)
+      // Desktop: keep the highlighted stop in lock-step with the marker
+      setActiveIndex(Math.round(p))
     }
 
     const onScroll = () => {

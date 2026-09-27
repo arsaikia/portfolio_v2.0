@@ -218,9 +218,9 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
 
   return (
     <div className="sticky top-28 self-start">
-      {/* Cross-fading company panel. All panels are stacked so there is never
-          an empty frame between transitions. */}
-      <div className="relative h-[268px]">
+      {/* Cross-fading company panel. Panels share one grid cell so the rail
+          sizes itself to the tallest entry — no magic height, no layout shift. */}
+      <div className="grid">
         {items.map((item, index) => {
           const accent = getAccent(item.accent)
           const isActive = index === activeIndex
@@ -229,7 +229,7 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
             <div
               key={item.id}
               aria-hidden={!isActive}
-              className="absolute inset-0"
+              className="col-start-1 row-start-1"
               style={{
                 opacity: isActive ? 1 : 0,
                 transform: isActive ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.985)',

@@ -175,8 +175,9 @@ fully-spelled class names.
 
 - `responsibilities[]` is now surfaced via the disclosure. If an entry grows
   past ~6 bullets, consider truncating rather than making the card taller.
-- The rail panel uses a fixed `h-[268px]` to prevent layout shift during the
-  cross-fade. If you add a field to the rail, bump that height.
+- The rail panel stacks every company in a single CSS grid cell
+  (`col-start-1 row-start-1`), so it self-sizes to the tallest entry and stays
+  stable during the cross-fade. Adding a field needs no height tweak.
 - Adding a 5th experience entry works without code changes, but the stagger
   delay caps at index 3 by design — later cards reveal immediately so the
   section never feels sluggish.

@@ -345,7 +345,7 @@ const CompanyRail = ({ items, activeIndex, progress, reduced, onSelect }: Compan
 /*  Winding road nav: gradient trail + travelling marker                       */
 /* -------------------------------------------------------------------------- */
 
-const STOP_GAP = 60
+const STOP_GAP = 76
 const ROAD_W = 56
 const ROAD_CX = ROAD_W / 2
 /** Hand-tuned, irregular stop offsets so the road meanders instead of zig-zagging evenly. */
@@ -353,7 +353,7 @@ const STOP_OFFSETS = [-9, 7, -2, 12, -6, 4, -11]
 /** Small drift between stops so each bend has a different shape. */
 const WANDER = [0, 5, -4, 2, -6, 3, -2]
 /** Length of the faded dotted tail after the last stop (earlier, unlisted history). */
-const TAIL = 40
+const TAIL = 64
 
 type Pt = { x: number; y: number }
 
@@ -544,16 +544,21 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
       shadowRef.current?.setAttribute('opacity', (0.16 * mix.plane).toFixed(3))
       shadowRef.current?.setAttribute('rx', String((5 - 2 * mix.plane) * ICON_SCALE))
 
-      // Footprints: only while walking and moving
+      // Trail while moving: footprints behind the arrow, round puffs behind the plane / cap
       const prints = printsRef.current
       if (prints) {
-        walk += ((Math.abs(dl) > 0.02 && !reduced ? 1 : 0) * mix.arrow - walk) * 0.08
+        walk += ((Math.abs(dl) > 0.02 && !reduced ? 1 : 0) - walk) * 0.08
         const rad = ((angle + 90) * Math.PI) / 180
+        const feet = mix.arrow
+        const rx = (1.2 + 0.4 * feet).toFixed(2)
+        const ry = (1.2 + 1.2 * feet).toFixed(2)
         Array.from(prints.children).forEach((el, k) => {
           const q = path.getPointAtLength(Math.max(0, Math.min(L, len - dir * (13 + k * 5))))
-          const side = (k % 2 ? 1 : -1) * 2.2
+          const side = (k % 2 ? 1 : -1) * 2.2 * feet
           const x = q.x + Math.cos(rad) * side
-          const y = q.y + Math.sin(rad) * side
+          const y = q.y + Math.sin(rad) * side - lift * (1 - k / FOOTPRINTS)
+          el.setAttribute('rx', rx)
+          el.setAttribute('ry', ry)
           el.setAttribute('cx', x.toFixed(2))
           el.setAttribute('cy', y.toFixed(2))
           el.setAttribute('transform', `rotate(${angle + 90} ${x.toFixed(2)} ${y.toFixed(2)})`)
@@ -593,7 +598,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
             y2={stopY(items.length - 1) + TAIL}
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0" stopColor="currentColor" stopOpacity={0.9} />
+            <stop offset="0" stopColor="currentColor" stopOpacity={1} />
             <stop offset="1" stopColor="currentColor" stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -614,10 +619,9 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           d={tail}
           fill="none"
           stroke={`url(#${tailFadeId})`}
-          strokeWidth={2}
-          strokeDasharray="0.5 5"
+          strokeWidth={2.5}
+          strokeDasharray="0.5 6"
           strokeLinecap="round"
-          opacity={0.7}
           className="text-gray-400 dark:text-gray-500"
         />
 
@@ -721,8 +725,9 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
                   >
                     {item.company}
                   </span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
-                    {item.period} · {item.remote ? 'Remote' : cityOf(item.location)}
+                  <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.period}</span>
+                  <span className="text-[11px] text-gray-400/80 dark:text-gray-500/80 truncate">
+                    {item.remote ? 'Remote' : cityOf(item.location)}
                   </span>
                 </span>
               </button>

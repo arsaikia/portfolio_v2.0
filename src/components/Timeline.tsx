@@ -701,6 +701,21 @@ const legIcons = (items: ExperienceEntry[]): LegIcon[] =>
   })
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t)
+
+/** Accent used by the road for an entry — matches the rail year gradient so
+ *  ManifestHQ and IBM don't collapse onto the same blue. */
+const entryHex = (item: ExperienceEntry) => railHexes[item.id] ?? getAccent(item.accent).hex
+
+const mixHex = (a: string, b: string, t: number) => {
+  const to = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
+  const [ar, ag, ab] = to(a)
+  const [br, bg, bb] = to(b)
+  const ch = (x: number, y: number) =>
+    Math.round(x + (y - x) * t)
+      .toString(16)
+      .padStart(2, '0')
+  return `#${ch(ar, br)}${ch(ag, bg)}${ch(ab, bb)}`
+}
 /** Shortest-arc angle interpolation, in degrees. */
 const lerpAngle = (from: number, to: number, k: number) => from + ((((to - from + 540) % 360) + 360) % 360 - 180) * k
 
@@ -725,6 +740,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
   const shadowRef = useRef<SVGEllipseElement>(null)
   const printsRef = useRef<SVGGElement>(null)
   const legs = useMemo(() => legIcons(items), [items])
+  const hexes = useMemo(() => items.map(entryHex), [items])
   const stopLengths = useRef<number[]>([])
   const total = useRef(0)
   const current = useRef(progress)
@@ -840,6 +856,17 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           el.setAttribute('opacity', ((0.5 - k * 0.075) * walk).toFixed(3))
         })
       }
+
+      // Colour flows with the marker instead of snapping at each stop
+      const c0 = Math.max(0, Math.min(hexes.length - 1, Math.floor(p)))
+      const c1 = Math.max(0, Math.min(hexes.length - 1, c0 + 1))
+      const flow = mixHex(hexes[c0], hexes[c1], smoothstep(Math.max(0, Math.min(1, p - c0))))
+      if (trailRef.current) trailRef.current.style.stroke = flow
+      if (printsRef.current) printsRef.current.style.fill = flow
+      if (markerRef.current) {
+        markerRef.current.style.fill = flow
+        markerRef.current.style.color = flow
+      }
     }
 
     const loop = () => {
@@ -852,9 +879,9 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
     // Wait a frame so stop lengths are measured first
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [items.length, legs, reduced])
+  }, [items.length, legs, hexes, reduced])
 
-  const activeHex = getAccent(items[activeIndex]?.accent ?? 'blue').hex
+  const activeHex = hexes[activeIndex] ?? '#3b82f6'
 
   return (
     <nav className="relative mt-8" aria-label="Jump to role" style={{ height, marginBottom: TAIL - STOP_GAP / 2 }}>
@@ -891,7 +918,6 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           stroke={activeHex}
           strokeOpacity={0.3}
           strokeWidth={2}
-          style={{ transition: reduced ? 'none' : `stroke 420ms ${EASE_STATE}` }}
           strokeLinecap="round"
           strokeDasharray="10000"
           strokeDashoffset="10000"
@@ -899,7 +925,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
 
         {/* Stops */}
         {items.map((item, i) => {
-          const hex = getAccent(item.accent).hex
+          const hex = hexes[i]
           const isActive = i === activeIndex
           return (
             <g key={item.id} transform={`translate(${stopX(i)} ${stopY(i)})`}>
@@ -923,7 +949,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
         })}
 
         {/* Footprints behind the walking marker */}
-        <g ref={printsRef} fill={activeHex} style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}>
+        <g ref={printsRef} fill={activeHex}>
           {Array.from({ length: FOOTPRINTS }, (_, k) => (
             <ellipse key={k} rx={1.6} ry={2.4} opacity={0} />
           ))}
@@ -934,7 +960,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           ref={markerRef}
           transform={`translate(${stopX(0)} ${stopY(0)})`}
           fill={activeHex}
-          style={{ transition: reduced ? 'none' : `fill 420ms ${EASE_STATE}` }}
+          style={{ color: activeHex }}
         >
           <ellipse ref={shadowRef} rx={7.5} ry={1.8} opacity={0} className="fill-gray-900 dark:fill-black" />
           <g ref={arrowRef} transform={`rotate(90) scale(${ICON_SCALE})`}>
@@ -946,7 +972,7 @@ const RoadNav = ({ items, activeIndex, progress, reduced, onSelect }: RoadNavPro
           <g ref={capRef} opacity={0}>
             <path d="M0 -4.5 L7.5 -1.2 L0 2.1 L-7.5 -1.2 Z" />
             <path d="M-4.2 0.4 L-4.2 3.2 Q0 5.4 4.2 3.2 L4.2 0.4 L0 2.3 Z" opacity={0.85} />
-            <path d="M5.6 -0.6 L5.6 3.6" fill="none" strokeWidth={1} stroke={activeHex} />
+            <path d="M5.6 -0.6 L5.6 3.6" fill="none" strokeWidth={1} stroke="currentColor" />
             <circle cx={5.6} cy={4} r={0.9} />
           </g>
         </g>

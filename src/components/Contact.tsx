@@ -56,7 +56,7 @@ const Contact = () => {
         <div className={`text-center mb-8 sm:mb-12 transition-all duration-1000 ease-out ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
             <span className="bg-gradient-to-r from-slate-900 via-blue-700 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent">
               Get In Touch
             </span>

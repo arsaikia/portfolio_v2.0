@@ -1,12 +1,23 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Menu, X, Sun, Moon } from 'lucide-react'
 import CuteAnimalEyes from './CuteAnimalEyes'
+import { useActiveSection } from '../hooks/useActiveSection'
+
+const NAV_ITEMS = [
+  { name: 'About', href: 'about' },
+  { name: 'Skills', href: 'skills' },
+  { name: 'Projects', href: 'projects' },
+  { name: 'Contact', href: 'contact' },
+]
+
+const SECTION_IDS = NAV_ITEMS.map((item) => item.href)
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const activeSection = useActiveSection(SECTION_IDS)
 
   const handleMenuKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isMenuOpen || !menuRef.current) return
@@ -72,17 +83,13 @@ const Header = () => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' })
     }
     setIsMenuOpen(false)
   }
 
-  const navItems = [
-    { name: 'About', href: 'about' },
-    { name: 'Skills', href: 'skills' },
-    { name: 'Projects', href: 'projects' },
-    { name: 'Contact', href: 'contact' },
-  ]
+  const navItems = NAV_ITEMS
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
@@ -100,15 +107,23 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => scrollToSection(item.href)}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                {item.name}
-              </button>
-            ))}
+            {navItems.map((item) => {
+              const isActive = activeSection === item.href
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => scrollToSection(item.href)}
+                  aria-current={isActive ? 'true' : undefined}
+                  className={`relative font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:rounded-full after:bg-blue-600 after:transition-all after:duration-200 dark:after:bg-blue-400 ${
+                    isActive
+                      ? 'text-blue-600 dark:text-blue-400 after:w-full'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 after:w-0 hover:after:w-full'
+                  }`}
+                >
+                  {item.name}
+                </button>
+              )
+            })}
           </nav>
 
           {/* Dark Mode Toggle & Mobile Menu */}
@@ -141,15 +156,23 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden" ref={menuRef} id="mobile-menu" role="navigation" aria-label="Mobile navigation">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-              {navItems.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => scrollToSection(item.href)}
-                  className="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors w-full text-left"
-                >
-                  {item.name}
-                </button>
-              ))}
+              {navItems.map((item) => {
+                const isActive = activeSection === item.href
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => scrollToSection(item.href)}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={`block w-full px-3 py-2 text-left font-medium transition-colors border-l-2 ${
+                      isActive
+                        ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10'
+                        : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                    }`}
+                  >
+                    {item.name}
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}

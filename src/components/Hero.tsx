@@ -73,7 +73,7 @@ const Hero = () => {
                   </span>
                 </h1>
                 
-                <h2 
+                <p
                   className={`text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium transition-all duration-1000 ease-out delay-300 ${
                     isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
@@ -81,7 +81,7 @@ const Hero = () => {
                   <span className="bg-gradient-to-r from-gray-600 via-blue-600 to-purple-600 dark:from-gray-300 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent">
                     Senior Software Engineer @Adobe
                   </span>
-                </h2>
+                </p>
 
                 <p 
                   className={`text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed transition-all duration-1000 ease-out delay-500 max-w-lg mx-auto lg:mx-0 ${

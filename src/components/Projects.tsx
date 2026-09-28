@@ -379,7 +379,7 @@ const Projects = () => {
                   <time className="tabular-nums">{featured.period}</time>
                   <span className="hidden sm:inline">· {featured.role}</span>
                 </div>
-                <h3 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                <h3 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                   {featured.title}
                 </h3>
                 <div className="mt-4">

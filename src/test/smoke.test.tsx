@@ -37,10 +37,10 @@ describe('Smoke tests', () => {
   it('renders skill categories', async () => {
     const { default: Skills } = await import('../components/Skills')
     render(<Skills />)
-    expect(screen.getByText('Frontend Technologies')).toBeInTheDocument()
-    expect(screen.getByText('Backend Technologies')).toBeInTheDocument()
-    expect(screen.getByText('DevOps & Tools')).toBeInTheDocument()
-    expect(screen.getByText('Architecture & Leadership')).toBeInTheDocument()
+    expect(screen.getByText('Product engineering')).toBeInTheDocument()
+    expect(screen.getByText('Frontend at scale')).toBeInTheDocument()
+    expect(screen.getByText('Backend & platform')).toBeInTheDocument()
+    expect(screen.getByText('Technical leadership')).toBeInTheDocument()
   })
 
   it('renders contact section with updated availability text', async () => {

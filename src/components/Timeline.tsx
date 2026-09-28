@@ -17,6 +17,8 @@ import {
 } from 'lucide-react'
 import { experience } from '../data/experience'
 import type { ExperienceEntry } from '../data/experience'
+import { accentFor } from '../data/companyAccents'
+import type { CompanyAccent } from '../data/companyAccents'
 
 /* -------------------------------------------------------------------------- */
 /*  Icon + logo resolution (keeps ../data/experience serialisable)             */
@@ -45,65 +47,9 @@ const typeIcon = (type: ExperienceEntry['type'], className = 'w-4 h-4') =>
 const TECH_CHIP_LIMIT = 5
 
 /* -------------------------------------------------------------------------- */
-/*  Rail identity: one distinct year gradient per entry.                       */
-/*  Accents are shared (ManifestHQ + IBM are both "blue"), so the rail keeps   */
-/*  its own map — fully-spelled classes so Tailwind can extract them.          */
+/*  Rail identity: one distinct accent per entry, shared with the skills grid   */
+/*  via ../data/companyAccents so a colour means the same company sitewide.     */
 /* -------------------------------------------------------------------------- */
-
-type RailAccent = {
-  /** Gradient shared by the year odometer, the card top-bar and logo fallbacks. */
-  gradient: string
-  /** Endpoint hexes of `gradient` — the odometer paints a slice per digit. */
-  stops: [string, string]
-  /** Road trail / marker colour: the gradient's dominant end. */
-  hex: string
-  text: string
-  dot: string
-  soft: string
-}
-
-const railAccents: Record<string, RailAccent> = {
-  adobe: {
-    gradient: 'from-red-500 to-orange-500',
-    stops: ['#ef4444', '#f97316'],
-    hex: '#f97316',
-    text: 'text-red-600 dark:text-red-400',
-    dot: 'bg-red-500',
-    soft: 'bg-red-50 dark:bg-red-950/40',
-  },
-  manifesthq: {
-    gradient: 'from-indigo-500 to-purple-500',
-    stops: ['#6366f1', '#a855f7'],
-    hex: '#8b5cf6',
-    text: 'text-indigo-600 dark:text-indigo-400',
-    dot: 'bg-indigo-500',
-    soft: 'bg-indigo-50 dark:bg-indigo-950/40',
-  },
-  iit: {
-    gradient: 'from-amber-500 to-rose-500',
-    stops: ['#f59e0b', '#f43f5e'],
-    hex: '#f43f5e',
-    text: 'text-amber-600 dark:text-amber-400',
-    dot: 'bg-amber-500',
-    soft: 'bg-amber-50 dark:bg-amber-950/40',
-  },
-  udacity: {
-    gradient: 'from-green-500 to-cyan-500',
-    stops: ['#22c55e', '#06b6d4'],
-    hex: '#10b981',
-    text: 'text-green-600 dark:text-green-400',
-    dot: 'bg-green-500',
-    soft: 'bg-green-50 dark:bg-green-950/40',
-  },
-  ibm: {
-    gradient: 'from-blue-700 to-sky-400',
-    stops: ['#1d4ed8', '#38bdf8'],
-    hex: '#38bdf8',
-    text: 'text-blue-700 dark:text-sky-400',
-    dot: 'bg-blue-600',
-    soft: 'bg-blue-50 dark:bg-blue-950/40',
-  },
-}
 
 const MONTHS = [
   'january',
@@ -153,21 +99,11 @@ const durationLabel = (period: string) => {
 }
 
 /**
- * Per-company palette: `railAccents` above is the single source of truth, so
- * every surface — rail year, road trail, card top-bar, card body text — reads
- * from it. The fallback only fires for an id with no entry there.
+ * Per-company palette: `companyAccents` in ../data is the single source of
+ * truth, so every surface (rail year, road trail, card top-bar, card body
+ * text, and the skills grid) reads the same colour for the same company.
  */
-const FALLBACK_ACCENT: RailAccent = {
-  gradient: 'from-blue-600 to-indigo-600',
-  stops: ['#3b82f6', '#6366f1'],
-  hex: '#3b82f6',
-  text: 'text-blue-600 dark:text-blue-400',
-  dot: 'bg-blue-500',
-  soft: 'bg-blue-50 dark:bg-blue-950/40',
-}
-
-const railAccent = (item: Pick<ExperienceEntry, 'id'>): RailAccent =>
-  railAccents[item.id] ?? FALLBACK_ACCENT
+const railAccent = (item: Pick<ExperienceEntry, 'id'>): CompanyAccent => accentFor(item.id)
 
 /* -------------------------------------------------------------------------- */
 /*  Motion primitives                                                          */

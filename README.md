@@ -5,6 +5,7 @@ A modern, performant, and minimal portfolio site built with React, TypeScript, T
 ## Features
 - Responsive, accessible design
 - Animated hero section
+- Cursor-following bear home icon that blinks, naps when idle, perks up on hover/focus, and reacts to escalating boops
 - Interactive timeline and project showcase
 - Contact form
 - SEO optimized

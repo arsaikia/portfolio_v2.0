@@ -410,6 +410,65 @@
   will-change: transform;
 }
 
+.bear-ear {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 250ms ease-out;
+}
+
+.animated-eyes[data-sleeping="true"] .bear-ear-left {
+  transform: translateY(2px) rotate(-8deg);
+}
+
+.animated-eyes[data-sleeping="true"] .bear-ear-right {
+  transform: translateY(2px) rotate(8deg);
+}
+
+.bear-lid {
+  transform-box: fill-box;
+  transform-origin: top;
+  transition: transform 150ms ease-out;
+}
+
+.bear-wiggle,
+.bear-spin {
+  transform-origin: 50px 55px;
+}
+
+.bear-wiggle {
+  animation: bear-wiggle 450ms ease-in-out;
+}
+
+.bear-spin {
+  animation: bear-spin 600ms ease-in-out;
+}
+
+.bear-particle {
+  position: absolute;
+  left: 50%;
+  top: 15%;
+  color: #ef4444;
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0;
+  animation: bear-float 1s ease-out forwards;
+}
+
+@keyframes bear-wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-9deg); }
+  60% { transform: rotate(7deg); }
+}
+
+@keyframes bear-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bear-float {
+  from { opacity: 1; transform: translate(-50%, 0) scale(0.6); }
+  to { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -38px) scale(1.1); }
+}
+
 /* Smooth transitions for eye movements */
 .eye-socket {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);

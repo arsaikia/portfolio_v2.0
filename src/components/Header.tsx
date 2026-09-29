@@ -15,6 +15,7 @@ const SECTION_IDS = NAV_ITEMS.map((item) => item.href)
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isBearFocused, setIsBearFocused] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const activeSection = useActiveSection(SECTION_IDS)
@@ -99,9 +100,12 @@ const Header = () => {
           <div className="flex-shrink-0">
             <button
               onClick={() => scrollToSection('hero')}
-              className="group hover:scale-110 transition-all duration-200 p-2"
+              onFocus={() => setIsBearFocused(true)}
+              onBlur={() => setIsBearFocused(false)}
+              aria-label="Back to top"
+              className="group hover:scale-110 transition-all duration-200 p-2 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
-              <CuteAnimalEyes size={60} />
+              <CuteAnimalEyes size={60} isFocused={isBearFocused} />
             </button>
           </div>
 

@@ -70,7 +70,7 @@ export const projects: Project[] = [
     demoVideo: '/pathfinding-demo.mp4',
     technologies: ['JavaScript', 'HTML5', 'CSS3', 'Canvas API'],
     features: ['Multiple Algorithms', 'Real-time Visualization', 'Customizable Grid', 'Performance Metrics'],
-    demoLink: '#',
+    demoLink: 'https://algo-visualizer-three-dun.vercel.app/pathfinding',
     githubLink: 'https://github.com/arsaikia/Pathfinding_Visualizer',
     period: '2022',
     team: 'Solo Project'
@@ -81,7 +81,7 @@ export const projects: Project[] = [
     description: 'Educational platform for visualizing sorting and searching algorithms with step-by-step execution and performance comparisons.',
     problem: 'Big-O notation does not show what an algorithm actually does. Learners need to see the swaps.',
     built: 'A React + D3 visualizer with step-by-step execution and performance comparison across algorithms.',
-    outcome: 'Deployed on GitHub Pages as a free learning tool.',
+    outcome: 'Free learning tool, now rebuilt in TypeScript and live on Vercel.',
     stats: ['React + D3', 'Step-through', 'Deployed'],
     year: '2022',
     mono: 'AV',
@@ -91,7 +91,7 @@ export const projects: Project[] = [
     demoVideo: '/algorithm-demo.mp4',
     technologies: ['JavaScript', 'React', 'D3.js', 'CSS3'],
     features: ['Sorting Algorithms', 'Searching Algorithms', 'Step-by-step Execution', 'Performance Comparison'],
-    demoLink: 'https://arsaikia.github.io/AlgorithmVisualizer/',
+    demoLink: 'https://algo-visualizer-three-dun.vercel.app/sorting',
     githubLink: 'https://github.com/arsaikia/AlgorithmVisualizer',
     period: '2022',
     team: 'Solo Project'
